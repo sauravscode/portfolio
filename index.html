@@ -3,29 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio | Data Engineer</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="description" content="Saurav Sudhar - Software/Infrastructure Engineer Portfolio">
+    <meta name="author" content="Saurav Sudhar">
+    <title>Saurav Sudhar | Software Engineer</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <header>
-        <div class="nav">
-            <span>Your Name</span>
-            <span>Data Engineer | Software Engineer</span>
-            <span>Location | Contact</span>
-        </div>
-    </header>
 
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-brand">SAURAV_SUDHAR<span>.DEV</span></div>
+        
+        <button class="mobile-toggle" onclick="toggleMenu()" aria-label="Toggle menu">MENU [+]</button>
+
+        <ul class="nav-links" id="nav-list" role="navigation">
+            <li><a onclick="route('home')" class="nav-item active" role="button" tabindex="0">INDEX</a></li>
+            <li><a onclick="route('experience')" class="nav-item" role="button" tabindex="0">EXPERIENCE</a></li>
+            <li><a onclick="route('projects')" class="nav-item" role="button" tabindex="0">WORK</a></li>
+            <li><a onclick="route('books')" class="nav-item" role="button" tabindex="0">BOOKS</a></li>
+            <li><a onclick="route('photography')" class="nav-item" role="button" tabindex="0">VISUALS</a></li>
+        </ul>
+        
+        <div class="status-indicator desktop-only" aria-label="System status">SYS: ONLINE</div>
+    </nav>
+
+    <!-- Main Content -->
     <main>
-        <h1>CREATIVE DEVELOPER</h1>
-        <div class="image-container">
-            <img src="images/profile.jpg" alt="Profile Image">
-            <div class="drag-circle">Drag me</div>
+        
+        <!-- Home Page -->
+        <div id="home" class="page active">
+            <div class="container hero-container">
+                <h1 class="hero-glitch">
+                    SOFTWARE /<br>
+                    <span class="hero-sub">INFRASTRUCTURE</span>
+                    ENGINEERING
+                </h1>
+                <div class="hero-role">
+                    > CURRENT STATUS: BUILDING SCALABLE SYSTEMS
+                </div>
+                <blockquote class="quote-box">
+                    <p>"Any sufficiently advanced technology is indistinguishable from magic."</p>
+                    <cite>// ARTHUR_C_CLARKE</cite>
+                </blockquote>
+                
+                <div class="hero-cta">
+                    <button class="btn" onclick="route('projects')">Initialize_Portfolio</button>
+                </div>
+            </div>
         </div>
-        <h2>Your Name</h2>
-        <p>I support businesses and teams with data-driven solutions.</p>
-        <a href="#projects" class="arrow">↓</a>
+
+        <!-- Experience Page -->
+        <div id="experience" class="page">
+            <div class="container">
+                <h2 class="section-header">Execution_Logs</h2>
+                <div id="exp-inject"></div>
+            </div>
+        </div>
+
+        <!-- Projects Page -->
+        <div id="projects" class="page">
+            <div class="container">
+                <h2 class="section-header">System_Modules</h2>
+                <div class="project-grid" id="proj-inject"></div>
+            </div>
+        </div>
+
+        <!-- Books Page -->
+        <div id="books" class="page">
+            <div class="container">
+                <h2 class="section-header">Knowledge_Base</h2>
+                <div class="books-section">
+                    <h3 class="books-category-title">// ACTIVE_PROCESSES</h3>
+                    <table class="book-table">
+                        <tbody id="books-reading"></tbody>
+                    </table>
+                </div>
+                <div class="books-section">
+                    <h3 class="books-category-title finished">// TERMINATED_PROCESSES (COMPLETED)</h3>
+                    <table class="book-table">
+                        <tbody id="books-finished"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Photography Page -->
+        <div id="photography" class="page">
+            <div class="container">
+                <h2 class="section-header">Visual_Input</h2>
+                <div class="photo-sheet" id="photo-inject"></div>
+            </div>
+        </div>
+
+        <!-- Contact Section -->
+        <div class="container contact-container">
+            <div class="contact-area">
+                <a href="https://github.com/sauravscode" target="_blank" rel="noopener noreferrer" class="contact-link">
+                    <span>// REPOSITORY</span>
+                    GITHUB
+                </a>
+                <a href="https://www.linkedin.com/in/sauravsnair/" target="_blank" rel="noopener noreferrer" class="contact-link">
+                    <span>// NETWORK</span>
+                    LINKEDIN
+                </a>
+                <a href="mailto:hello@saurav.dev" class="contact-link">
+                    <span>// SIGNAL</span>
+                    EMAIL
+                </a>
+            </div>
+        </div>
+
     </main>
 
-    <script src="script.js"></script>
+    <!-- Project Modal -->
+    <div id="project-overlay" role="dialog" aria-modal="true" aria-labelledby="m-title">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()" aria-label="Close modal">[X] CLOSE</button>
+            <h2 id="m-title"></h2>
+            <div id="m-tags"></div>
+            <p id="m-desc"></p>
+            <a id="m-link" href="#" target="_blank" rel="noopener noreferrer" class="btn">Access Source ></a>
+        </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div id="lightbox" role="dialog" aria-modal="true">
+        <img id="lb-img" src="" alt="Full size photograph">
+        <button onclick="closeLightbox()" class="lightbox-close" aria-label="Close lightbox">[ CLOSE VIEW ]</button>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>
