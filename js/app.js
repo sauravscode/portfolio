@@ -86,9 +86,10 @@ function renderPhotos() {
         const safeAlt = sanitizeHTML(photo.alt);
         const safeTitle = sanitizeHTML(photo.title);
         const safeLocation = sanitizeHTML(photo.location);
+        const safeSize = sanitizeHTML(photo.size || 'small');
 
         return `
-            <div class="photo-frame" 
+            <div class="photo-frame size-${safeSize}" 
                  onclick="viewPhoto('${safeUrl}', '${safeAlt}')" 
                  role="button" 
                  tabindex="0"
@@ -104,9 +105,7 @@ function renderPhotos() {
             </div>
         `;
     }).join('');
-}
-
-/**
+}/**
  * Render books tables
  */
 function renderBooks() {
@@ -233,9 +232,9 @@ function updatePageTitle(pageId) {
 function updateActiveNavItem(pageId) {
     const navMapping = {
         'home': 'index',
-        'experience': 'logs',
-        'projects': 'systems',
-        'books': 'data',
+        'experience': 'experience',
+        'projects': 'work',
+        'books': 'books',
         'photography': 'visuals'
     };
 
@@ -248,9 +247,7 @@ function updateActiveNavItem(pageId) {
             item.classList.add('active');
         }
     });
-}
-
-/**
+}/**
  * Open project modal
  * @param {number} projectId - ID of project to display
  */
@@ -455,6 +452,81 @@ function logPerformance() {
 }
 
 /**
+ * Initialize cycling text animation for hero section
+ */
+function initCyclingText() {
+    const cyclingElement = document.getElementById('cycling-text');
+    if (!cyclingElement) return;
+
+    const phrases = [
+        'BUILDING SCALABLE SYSTEMS',
+        'CREATING APPLICATIONS',
+        'NETWORKING',
+        'READING BOOKS',
+        'CREATIVE PHOTOGRAPHY'
+    ];
+    let currentIndex = 0;
+
+    function updateText() {
+        // Add fade-out effect
+        cyclingElement.style.opacity = '0';
+        cyclingElement.style.transform = 'translateY(-10px)';
+
+        setTimeout(() => {
+            // Change text with proper coloring
+            currentIndex = (currentIndex + 1) % phrases.length;
+            const phrase = phrases[currentIndex];
+            const words = phrase.split(' ');
+
+            let styledText = '';
+            if (words.length === 1) {
+                // Single word - make it yellow
+                styledText = `<span class="word-yellow">${words[0]}</span>`;
+            } else {
+                // Multiple words - all cyan except last one yellow
+                for (let i = 0; i < words.length; i++) {
+                    if (i === words.length - 1) {
+                        styledText += `<span class="word-yellow">${words[i]}</span>`;
+                    } else {
+                        styledText += `<span class="word-cyan">${words[i]}</span>`;
+                        if (i < words.length - 1) styledText += ' ';
+                    }
+                }
+            }
+
+            cyclingElement.innerHTML = styledText;
+
+            // Fade back in
+            cyclingElement.style.opacity = '1';
+            cyclingElement.style.transform = 'translateY(0)';
+        }, 300);
+    }
+
+    // Initial setup
+    const initialPhrase = phrases[0];
+    const initialWords = initialPhrase.split(' ');
+    let initialStyledText = '';
+
+    if (initialWords.length === 1) {
+        initialStyledText = `<span class="word-yellow">${initialWords[0]}</span>`;
+    } else {
+        for (let i = 0; i < initialWords.length; i++) {
+            if (i === initialWords.length - 1) {
+                initialStyledText += `<span class="word-yellow">${initialWords[i]}</span>`;
+            } else {
+                initialStyledText += `<span class="word-cyan">${initialWords[i]}</span>`;
+                if (i < initialWords.length - 1) initialStyledText += ' ';
+            }
+        }
+    }
+
+    cyclingElement.innerHTML = initialStyledText;
+
+    // Start cycling
+    setInterval(updateText, 2000);
+}
+
+/**
  * Error boundary for graceful error handling
  */
 window.addEventListener('error', (event) => {
@@ -473,6 +545,7 @@ function init() {
     initKeyboardNavigation();
     initSmoothScroll();
     initHistoryNavigation();
+    initCyclingText();
 
     // Add event listeners
     document.addEventListener('keydown', handleEscapeKey);
@@ -485,9 +558,7 @@ function init() {
     }
 
     console.log('Portfolio initialized successfully');
-}
-
-/**
+}/**
  * Run initialization when DOM is ready
  */
 if (document.readyState === 'loading') {
