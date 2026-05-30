@@ -1,568 +1,472 @@
-// ========================================
-// APPLICATION LOGIC
-// ========================================
+/* ============================================================================
+   app.js — behaviour
+   ----------------------------------------------------------------------------
+   Renders every section from DATA (see data.js) and wires the interactions:
+   theme, live status clock, scroll reveals, the spine, the section-aware nav,
+   the Cloudinary gallery with blur-up, the lightbox, and the custom cursor.
 
-/**
- * Sanitize HTML to prevent XSS attacks
- * @param {string} str - String to sanitize
- * @returns {string} Sanitized string
- */
-function sanitizeHTML(str) {
-    if (typeof str !== 'string') return '';
-    const temp = document.createElement('div');
-    temp.textContent = str;
-    return temp.innerHTML;
-}
+   Plain ES2020, no dependencies. Everything degrades gracefully:
+   reduced-motion users get the content with the motion stripped out, and
+   touch users get a normal pointer.
+   ========================================================================== */
+(() => {
+  "use strict";
 
-/**
- * Render all content sections
- */
-function render() {
-    renderExperience();
-    renderProjects();
-    renderPhotos();
-    renderBooks();
-}
+  const $  = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+  const el = (tag, cls, html) => {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (html != null) n.innerHTML = html;
+    return n;
+  };
+  const esc = (s) => String(s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-/**
- * Render experience section
- */
-function renderExperience() {
-    const container = document.getElementById('exp-inject');
-    if (!container) return;
+  const prefersReduced =
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    container.innerHTML = expData.map(exp => `
-        <div class="exp-row">
-            <div class="exp-meta">
-                <div>${sanitizeHTML(exp.time)}</div>
-                <div>// ${sanitizeHTML(exp.role)}</div>
-            </div>
-            <div class="exp-content">
-                <span class="exp-company">${sanitizeHTML(exp.company)}</span>
-                <p>${sanitizeHTML(exp.desc)}</p>
-            </div>
+  /* ==========================================================================
+     1. CLOUDINARY URL BUILDING
+     Builds optimised, responsive URLs from a public ID. If a full URL is
+     given instead (starts with http), it's used as-is so content can be wired
+     before Cloudinary is set up.
+     ========================================================================== */
+  const cloud = (DATA.photography && DATA.photography.cloudName) || "";
+
+  const isFullUrl = (id) => /^https?:\/\//.test(id);
+
+  function cldUrl(publicId, { w, blur = false } = {}) {
+    if (isFullUrl(publicId)) return publicId;
+    const base = `https://res.cloudinary.com/${cloud}/image/upload`;
+    const t = blur
+      ? "f_auto,q_1,w_64,e_blur:1400,c_limit"
+      : `f_auto,q_auto,c_limit${w ? `,w_${w}` : ""}`;
+    return `${base}/${t}/${publicId}`;
+  }
+
+  function cldSrcset(publicId) {
+    if (isFullUrl(publicId)) return "";
+    return [600, 900, 1200, 1800]
+      .map((w) => `${cldUrl(publicId, { w })} ${w}w`)
+      .join(", ");
+  }
+
+  /* ==========================================================================
+     2. RENDER — pour DATA into the page
+     ========================================================================== */
+  function renderMasthead() {
+    $("#brand-name").textContent = DATA.site.name;
+    $("#brand-role").textContent = DATA.site.role;
+  }
+
+  function renderHero() {
+    const h = DATA.hero;
+    $("#hero-eyebrow").textContent = h.eyebrow;
+
+    // Each headline line becomes a masked element that wipes up on load.
+    const head = $("#hero-headline");
+    head.innerHTML = h.headline.map((line) => {
+      const html = esc(line).replace(
+        /\{\{(.+?)\}\}/g,
+        '<span class="accent">$1</span>'
+      );
+      return `<span class="line-mask"><span>${html}</span></span>`;
+    }).join("");
+
+    $("#hero-deck").textContent = h.deck;
+
+    $("#hero-meta").innerHTML = [
+      DATA.site.locationLabel,
+      DATA.site.coordinates,
+      "Available for the right work"
+    ].map((m) => `<span>${esc(m)}</span>`).join("");
+  }
+
+  function renderWork() {
+    const items = DATA.work;
+    const featured = items.find((w) => w.featured) || items[0];
+    const rest = items.filter((w) => w !== featured);
+
+    // Featured centrepiece -------------------------------------------------
+    const f = featured;
+    const fEl = el("article", "featured reveal");
+    fEl.innerHTML = `
+      <div class="featured__main">
+        <p class="featured__tag mono">Featured · ${esc(f.year)}</p>
+        <h3 class="featured__name">${esc(f.name)}</h3>
+        <p class="featured__tagline">${esc(f.tagline)}</p>
+        <p class="featured__desc">${esc(f.description)}</p>
+      </div>
+      <div class="featured__aside">
+        <div class="manifest">${manifestRows(f.manifest)}</div>
+        <ul class="stack">${f.stack.map((s) => `<li>${esc(s)}</li>`).join("")}</ul>
+        ${linksHtml(f.links)}
+      </div>`;
+    $("#work-featured").appendChild(fEl);
+
+    // The rest, as an indexed list ----------------------------------------
+    const list = $("#work-list");
+    rest.forEach((w, i) => {
+      const li = el("li", "work__item reveal");
+      li.style.setProperty("--reveal-delay", `${i * 0.06}s`);
+      const idx = String(i + 2).padStart(2, "0");
+      const firstLink = w.links && w.links[0] ? w.links[0].href : null;
+      const nameInner = firstLink
+        ? `<a href="${esc(firstLink)}" target="_blank" rel="noopener">${esc(w.name)} <span class="arrow">↗</span></a>`
+        : esc(w.name);
+      li.innerHTML = `
+        <span class="work__idx">${idx}</span>
+        <div class="work__main">
+          <h3 class="work__name">${nameInner}</h3>
+          <p class="work__tagline">${esc(w.tagline)}</p>
+          <p class="work__desc">${esc(w.description)}</p>
+          <ul class="stack work__stack">${w.stack.map((s) => `<li>${esc(s)}</li>`).join("")}</ul>
         </div>
-    `).join('');
-}
+        <span class="work__year mono">${esc(w.year)}</span>`;
+      list.appendChild(li);
+    });
+  }
 
-/**
- * Render projects grid
- */
-function renderProjects() {
-    const container = document.getElementById('proj-inject');
-    if (!container) return;
+  function manifestRows(m) {
+    return Object.entries(m).map(([k, v]) => `
+      <div class="manifest__row">
+        <span class="manifest__k">${esc(k)}</span>
+        <span class="manifest__v">${esc(v)}</span>
+      </div>`).join("");
+  }
 
-    container.innerHTML = projData.map((proj, index) => `
-        <div class="project-card">
-            <div>
-                <div class="p-header">
-                    <div class="p-id">0${index + 1}</div>
-                    <div class="p-stack">
-                        ${proj.stack.map(tech =>
-        `<span class="tag">${sanitizeHTML(tech)}</span>`
-    ).join(' ')}
-                    </div>
-                </div>
-                <h3 class="p-title">${sanitizeHTML(proj.title)}</h3>
-                <p class="p-desc">${sanitizeHTML(proj.desc)}</p>
-            </div>
-            <div class="p-footer">
-                <span class="p-status">STATUS: DEPLOYED</span>
-                <button class="btn" onclick="openModal(${proj.id})" aria-label="View details for ${sanitizeHTML(proj.title)}">Inspect</button>
-            </div>
-        </div>
-    `).join('');
-}
+  function linksHtml(links) {
+    if (!links || !links.length) return "";
+    return links.map((l) =>
+      `<a class="link-arrow" href="${esc(l.href)}" target="_blank" rel="noopener">${esc(l.label)} <span aria-hidden="true">↗</span></a>`
+    ).join("");
+  }
 
-/**
- * Render photography gallery
- */
-function renderPhotos() {
-    const container = document.getElementById('photo-inject');
-    if (!container) return;
+  function renderAbout() {
+    $("#about-body").innerHTML =
+      DATA.about.paragraphs.map((p) => `<p>${esc(p)}</p>`).join("");
 
-    container.innerHTML = photoData.map(photo => {
-        const safeUrl = sanitizeHTML(photo.url);
-        const safeAlt = sanitizeHTML(photo.alt);
-        const safeTitle = sanitizeHTML(photo.title);
-        const safeLocation = sanitizeHTML(photo.location);
-        const safeSize = sanitizeHTML(photo.size || 'small');
+    const dl = $("#about-notes");
+    dl.innerHTML = DATA.about.notes.map((n) => `
+      <div>
+        <dt>${esc(n.k)}</dt>
+        <dd>${esc(n.v)}</dd>
+      </div>`).join("");
+  }
 
-        return `
-            <div class="photo-frame size-${safeSize}" 
-                 onclick="viewPhoto('${safeUrl}', '${safeAlt}')" 
-                 role="button" 
-                 tabindex="0"
-                 onkeypress="if(event.key==='Enter') viewPhoto('${safeUrl}', '${safeAlt}')"
-                 aria-label="View photo: ${safeTitle}, ${safeLocation}">
-                <img src="${safeUrl}" 
-                     alt="${safeAlt}" 
-                     loading="lazy">
-                <div class="photo-meta">
-                    <span>${safeTitle}</span>
-                    <span>${safeLocation}</span>
-                </div>
-            </div>
-        `;
-    }).join('');
-}/**
- * Render books tables
- */
-function renderBooks() {
-    const readingContainer = document.getElementById('books-reading');
-    const finishedContainer = document.getElementById('books-finished');
+  let GALLERY = [];
+  function renderPhotography() {
+    const p = DATA.photography;
+    GALLERY = p.photos;
+    $("#photo-sub").textContent = `Landscape · architecture · travel — shot on ${p.gear}`;
+    $("#photo-instagram").href = p.instagram;
 
-    if (!readingContainer || !finishedContainer) return;
+    const wrap = $("#gallery");
+    p.photos.forEach((photo, i) => {
+      const a = el("button", "shot reveal");
+      a.type = "button";
+      a.style.aspectRatio = String(photo.ratio || 1.5);
+      a.style.setProperty("--reveal-delay", `${(i % 3) * 0.08}s`);
+      a.setAttribute("aria-label", `Open photograph: ${photo.caption || "untitled"}`);
+      a.dataset.index = i;
 
-    const createRow = (book, status, color) => `
-        <tr>
-            <td>
-                <b>${sanitizeHTML(book.title)}</b><br>
-                <span style="font-size:0.85em; color:#666">by ${sanitizeHTML(book.author)}</span>
-            </td>
-            <td>
-                <span class="status-dot" style="background:${color}" aria-hidden="true"></span>${status}
-            </td>
-        </tr>
-    `;
+      const num = String(i + 1).padStart(2, "0");
+      const img = new Image();
+      img.alt = photo.caption || "Photograph by Saurav Sudhar";
+      img.loading = "lazy";
+      img.decoding = "async";
+      img.src = cldUrl(photo.publicId, { blur: true }); // LQIP first
+      const srcset = cldSrcset(photo.publicId);
 
-    readingContainer.innerHTML = booksReading
-        .map(book => createRow(book, "READING", "#00f0ff"))
-        .join('');
+      // Blur-up: load the full image, then swap and reveal.
+      const full = new Image();
+      full.onload = () => {
+        img.src = full.currentSrc || full.src;
+        if (srcset) { img.srcset = srcset; img.sizes = "(max-width: 560px) 92vw, (max-width: 1024px) 46vw, 30vw"; }
+        a.classList.add("is-loaded");
+      };
+      full.onerror = () => a.classList.add("is-loaded"); // show LQIP rather than nothing
+      if (srcset) { full.sizes = "(max-width: 560px) 92vw, (max-width: 1024px) 46vw, 30vw"; full.srcset = srcset; }
+      full.src = cldUrl(photo.publicId, { w: 1200 });
 
-    finishedContainer.innerHTML = booksDone
-        .map(book => createRow(book, "ARCHIVED", "#888"))
-        .join('');
-}
+      a.appendChild(img);
+      a.appendChild(el("span", "shot__num mono", num));
+      if (photo.caption) a.appendChild(el("span", "shot__cap", esc(photo.caption)));
+      a.addEventListener("click", () => openLightbox(i));
+      wrap.appendChild(a);
+    });
+  }
 
-/**
- * Toggle mobile navigation menu
- */
-function toggleMenu() {
-    const navList = document.getElementById('nav-list');
-    const toggle = document.querySelector('.mobile-toggle');
+  function renderReading() {
+    const book = (b) => `
+      <li class="reveal">
+        <span class="book__title">${esc(b.title)}</span>
+        <span class="book__tag">${esc(b.tag)}</span>
+        <span class="book__author">${esc(b.author)}</span>
+        ${b.note ? `<span class="book__note">“${esc(b.note)}”</span>` : ""}
+      </li>`;
+    $("#shelf-current").innerHTML = DATA.reading.current.map(book).join("");
+    $("#shelf-finished").innerHTML = DATA.reading.finished.map(book).join("");
+  }
 
-    if (navList) {
-        const isOpen = navList.classList.toggle('mobile-open');
+  function renderConnect() {
+    const s = DATA.site.socials;
+    const links = [
+      ["GitHub", s.github],
+      ["LinkedIn", s.linkedin],
+      ["Instagram", s.instagram],
+      ["Email", `mailto:${DATA.site.email}`]
+    ].filter(([, href]) => href);
+    $("#connect-links").innerHTML = links.map(([label, href]) => {
+      const ext = href.startsWith("http") ? ' target="_blank" rel="noopener"' : "";
+      return `<a href="${esc(href)}"${ext}>${esc(label)}</a>`;
+    }).join("");
+  }
 
-        // Update button text
-        if (toggle) {
-            toggle.textContent = isOpen ? 'MENU [-]' : 'MENU [+]';
-            toggle.setAttribute('aria-expanded', isOpen);
-        }
-    }
-}
+  function renderColophon() {
+    $("#colophon-name").textContent = `© ${DATA.site.name}`;
+    $("#colophon-coords").textContent = DATA.site.coordinates;
+    $("#colophon-year").textContent = new Date().getFullYear();
+  }
 
-/**
- * Navigate to different pages with smooth loading transition
- * @param {string} pageId - ID of page to navigate to
- */
-function route(pageId) {
-    // Validate pageId
-    const validPages = ['home', 'experience', 'projects', 'books', 'photography'];
-    if (!validPages.includes(pageId)) {
-        console.error(`Invalid page ID: ${pageId}`);
-        return;
-    }
-
-    // Add loading state
-    const currentPage = document.querySelector('.page.active');
-    if (currentPage) {
-        currentPage.classList.add('page-loading');
-    }
-
-    // Smooth transition after brief delay
-    setTimeout(() => {
-        // Remove active class from all pages and nav items
-        document.querySelectorAll('.page').forEach(page =>
-            page.classList.remove('active', 'page-loading')
-        );
-        document.querySelectorAll('.nav-item').forEach(nav =>
-            nav.classList.remove('active')
-        );
-
-        // Add active class to target page
-        const targetPage = document.getElementById(pageId);
-        if (targetPage) {
-            targetPage.classList.add('active');
-
-            // Update page title
-            updatePageTitle(pageId);
-        }
-
-        // Update active nav item
-        updateActiveNavItem(pageId);
-
-        // Close mobile menu if open
-        const navList = document.getElementById('nav-list');
-        const toggle = document.querySelector('.mobile-toggle');
-        if (navList && navList.classList.contains('mobile-open')) {
-            navList.classList.remove('mobile-open');
-            if (toggle) {
-                toggle.textContent = 'MENU [+]';
-                toggle.setAttribute('aria-expanded', 'false');
-            }
-        }
-
-        // Scroll to top smoothly
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 100);
-}
-
-/**
- * Update page title based on current page
- * @param {string} pageId - Current page ID
- */
-function updatePageTitle(pageId) {
-    const titles = {
-        'home': 'Saurav Sudhar | Software Engineer',
-        'experience': 'Experience | Saurav Sudhar',
-        'projects': 'Projects | Saurav Sudhar',
-        'books': 'Books | Saurav Sudhar',
-        'photography': 'Photography | Saurav Sudhar'
+  /* ==========================================================================
+     3. LIVE STATUS — local time + an "observability" readout
+     ========================================================================== */
+  function startStatus() {
+    const out = $("#status-text");
+    const tz = DATA.site.timezone || "Europe/London";
+    const fmt = new Intl.DateTimeFormat("en-GB", {
+      hour: "2-digit", minute: "2-digit", second: "2-digit",
+      hour12: false, timeZone: tz
+    });
+    const tick = () => {
+      out.textContent = `${DATA.site.locationLabel} · ${fmt.format(new Date())} · reconciled`;
     };
+    tick();
+    setInterval(tick, 1000);
+  }
 
-    document.title = titles[pageId] || titles['home'];
-}
+  /* ==========================================================================
+     4. REVEALS — IntersectionObserver lifts elements into view
+     ========================================================================== */
+  function startReveals() {
+    const reveals = $$(".reveal, .line-mask");
+    if (prefersReduced || !("IntersectionObserver" in window)) {
+      reveals.forEach((n) => n.classList.add("is-in"));
+      return;
+    }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          // stagger masked headline lines
+          $$(".line-mask", e.target).forEach((m, i) =>
+            m.style.setProperty("--line-delay", `${i * 0.09}s`));
+          e.target.classList.add("is-in");
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
+    reveals.forEach((n) => io.observe(n));
+  }
 
-/**
- * Update active navigation item
- * @param {string} pageId - Current page ID
- */
-function updateActiveNavItem(pageId) {
-    const navMapping = {
-        'home': 'index',
-        'experience': 'experience',
-        'projects': 'work',
-        'books': 'books',
-        'photography': 'visuals'
+  /* ==========================================================================
+     5. SPINE + NAV — section-aware index and progress
+     ========================================================================== */
+  function startSectionObserver() {
+    const sections = $$("main .section");
+    const spineNum = $("#spine-num");
+    const spineLabel = $("#spine-label");
+    const spineFill = $("#spine-fill");
+    const navLinks = $$("[data-nav]");
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        const sec = e.target;
+        spineNum.textContent = sec.dataset.index || "00";
+        spineLabel.textContent = sec.dataset.label || "";
+        const id = sec.id;
+        navLinks.forEach((a) =>
+          a.classList.toggle("is-active", a.getAttribute("href") === `#${id}`));
+      });
+    }, { threshold: 0.5, rootMargin: "-30% 0px -30% 0px" });
+    sections.forEach((s) => io.observe(s));
+
+    // Scroll progress for the spine fill + masthead state
+    const masthead = $("#masthead");
+    const onScroll = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const pct = max > 0 ? (window.scrollY / max) * 100 : 0;
+      spineFill.style.height = `${pct}%`;
+      masthead.classList.toggle("is-scrolled", window.scrollY > 20);
     };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+  }
 
-    const targetText = navMapping[pageId];
-    if (!targetText) return;
+  /* ==========================================================================
+     6. THEME
+     ========================================================================== */
+  function startTheme() {
+    const root = document.documentElement;
+    const toggle = $("#theme-toggle");
+    const meta = $('meta[name="theme-color"]');
+    const stored = localStorage.getItem("theme");
+    const initial = stored ||
+      (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    apply(initial);
 
-    document.querySelectorAll('.nav-item').forEach(item => {
-        const itemText = item.textContent.toLowerCase();
-        if (itemText.includes(targetText)) {
-            item.classList.add('active');
-        }
+    function apply(t) {
+      root.setAttribute("data-theme", t);
+      toggle.setAttribute("aria-pressed", String(t === "dark"));
+      if (meta) meta.setAttribute("content", t === "dark" ? "#16150f" : "#f5f2ec");
+    }
+    toggle.addEventListener("click", () => {
+      const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      localStorage.setItem("theme", next);
+      apply(next);
     });
-}/**
- * Open project modal
- * @param {number} projectId - ID of project to display
- */
-function openModal(projectId) {
-    const project = projData.find(p => p.id === projectId);
-    if (!project) {
-        console.error(`Project not found: ${projectId}`);
-        return;
-    }
+  }
 
-    // Populate modal content
-    const titleElement = document.getElementById('m-title');
-    const descElement = document.getElementById('m-desc');
-    const tagsElement = document.getElementById('m-tags');
-    const linkElement = document.getElementById('m-link');
-
-    if (titleElement) titleElement.textContent = project.title;
-    if (descElement) descElement.textContent = project.full;
-
-    if (tagsElement) {
-        tagsElement.innerHTML = project.stack
-            .map(tech => `<span class="tag">${sanitizeHTML(tech)}</span>`)
-            .join('');
-    }
-
-    // Handle GitHub link
-    if (linkElement) {
-        if (project.github) {
-            linkElement.href = project.github;
-            linkElement.style.display = 'inline-flex';
-        } else {
-            linkElement.style.display = 'none';
-        }
-    }
-
-    // Show modal
-    const overlay = document.getElementById('project-overlay');
-    if (overlay) {
-        overlay.classList.add('active');
-        document.body.style.overflow = 'hidden';
-
-        // Focus on close button for accessibility
-        const closeButton = overlay.querySelector('.modal-close');
-        if (closeButton) {
-            setTimeout(() => closeButton.focus(), 100);
-        }
-    }
-}
-
-/**
- * Close project modal
- */
-function closeModal() {
-    const overlay = document.getElementById('project-overlay');
-    if (overlay) {
-        overlay.classList.remove('active');
-        document.body.style.overflow = 'auto';
-    }
-}
-
-/**
- * Open photo in lightbox
- * @param {string} url - URL of photo to display
- * @param {string} alt - Alt text for photo
- */
-function viewPhoto(url, alt = '') {
-    const lightbox = document.getElementById('lightbox');
-    const img = document.getElementById('lb-img');
-
-    if (lightbox && img) {
-        img.src = url;
-        img.alt = alt;
-        lightbox.classList.add('active');
-        document.body.style.overflow = 'hidden';
-
-        // Focus on close button for accessibility
-        const closeButton = lightbox.querySelector('.lightbox-close');
-        if (closeButton) {
-            setTimeout(() => closeButton.focus(), 100);
-        }
-    }
-}
-
-/**
- * Close photo lightbox
- */
-function closeLightbox() {
-    const lightbox = document.getElementById('lightbox');
-    if (lightbox) {
-        lightbox.classList.remove('active');
-        document.body.style.overflow = 'auto';
-    }
-}
-
-/**
- * Handle keyboard navigation for modal/lightbox
- */
-function handleEscapeKey(e) {
-    if (e.key === 'Escape') {
-        closeModal();
-        closeLightbox();
-    }
-}
-
-/**
- * Handle clicks outside modal to close
- */
-function handleOverlayClick(e) {
-    const projectOverlay = document.getElementById('project-overlay');
-    const lightbox = document.getElementById('lightbox');
-
-    // Close project modal if clicking on overlay background
-    if (e.target === projectOverlay) {
-        closeModal();
-    }
-
-    // Close lightbox if clicking on overlay background
-    if (e.target === lightbox) {
-        closeLightbox();
-    }
-}
-
-/**
- * Add keyboard support for navigation items
- */
-function initKeyboardNavigation() {
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                item.click();
-            }
-        });
+  /* ==========================================================================
+     7. MOBILE MENU
+     ========================================================================== */
+  function startMenu() {
+    const btn = $("#menu-toggle");
+    const nav = $("#primary-nav");
+    const close = () => {
+      nav.classList.remove("is-open");
+      btn.classList.remove("is-open");
+      btn.setAttribute("aria-expanded", "false");
+    };
+    btn.addEventListener("click", () => {
+      const open = nav.classList.toggle("is-open");
+      btn.classList.toggle("is-open", open);
+      btn.setAttribute("aria-expanded", String(open));
     });
-}
+    $$("[data-nav]").forEach((a) => a.addEventListener("click", close));
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+  }
 
-/**
- * Initialize smooth scroll for anchor links
- */
-function initSmoothScroll() {
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            const href = this.getAttribute('href');
-            if (href === '#') return;
+  /* ==========================================================================
+     8. LIGHTBOX
+     ========================================================================== */
+  let lbIndex = 0, lastFocused = null;
+  const lb = $("#lightbox"), lbImg = $("#lb-img"), lbCap = $("#lb-cap");
 
-            e.preventDefault();
-            const target = document.querySelector(href);
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
-        });
+  function openLightbox(i) {
+    lbIndex = i;
+    lastFocused = document.activeElement;
+    paintLightbox();
+    lb.hidden = false;
+    lb.classList.add("is-open");
+    document.body.style.overflow = "hidden";
+    $("#lb-close").focus();
+    document.addEventListener("keydown", lbKeys);
+  }
+  function closeLightbox() {
+    lb.hidden = true;
+    lb.classList.remove("is-open");
+    document.body.style.overflow = "";
+    document.removeEventListener("keydown", lbKeys);
+    if (lastFocused) lastFocused.focus();
+  }
+  function paintLightbox() {
+    const photo = GALLERY[lbIndex];
+    lbImg.src = cldUrl(photo.publicId, { w: 1800 });
+    lbImg.alt = photo.caption || "Photograph by Saurav Sudhar";
+    lbCap.textContent =
+      `${String(lbIndex + 1).padStart(2, "0")} / ${String(GALLERY.length).padStart(2, "0")}` +
+      (photo.caption ? ` — ${photo.caption}` : "");
+  }
+  function step(d) { lbIndex = (lbIndex + d + GALLERY.length) % GALLERY.length; paintLightbox(); }
+  function lbKeys(e) {
+    if (e.key === "Escape") closeLightbox();
+    else if (e.key === "ArrowRight") step(1);
+    else if (e.key === "ArrowLeft") step(-1);
+    else if (e.key === "Tab") { e.preventDefault(); } // simple focus trap
+  }
+  $("#lb-close").addEventListener("click", closeLightbox);
+  $("#lb-next").addEventListener("click", () => step(1));
+  $("#lb-prev").addEventListener("click", () => step(-1));
+  lb.addEventListener("click", (e) => { if (e.target === lb) closeLightbox(); });
+
+  /* ==========================================================================
+     9. CUSTOM CURSOR — lerped ring; "VIEW" viewfinder over photos
+     ========================================================================== */
+  function startCursor() {
+    const fine = window.matchMedia("(pointer: fine)").matches;
+    if (!fine || prefersReduced) return;
+    const cur = $("#cursor");
+    const label = $(".cursor__label", cur);
+    cur.style.display = "block";
+
+    let x = innerWidth / 2, y = innerHeight / 2, tx = x, ty = y;
+    window.addEventListener("mousemove", (e) => { tx = e.clientX; ty = e.clientY; }, { passive: true });
+
+    (function loop() {
+      x += (tx - x) * 0.18; y += (ty - y) * 0.18;
+      cur.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+      requestAnimationFrame(loop);
+    })();
+
+    document.addEventListener("mouseover", (e) => {
+      const shot = e.target.closest(".shot");
+      const link = e.target.closest("a, button, [role='button']");
+      cur.classList.toggle("is-view", !!shot);
+      cur.classList.toggle("is-link", !!link && !shot);
+      if (shot) label.textContent = "View";
     });
-}
-
-/**
- * Handle browser back/forward navigation
- */
-function initHistoryNavigation() {
-    // This is a basic implementation - can be enhanced with proper URL routing
-    window.addEventListener('popstate', () => {
-        // For now, just go to home
-        route('home');
+    document.addEventListener("mouseout", (e) => {
+      if (!e.relatedTarget) { cur.classList.remove("is-view", "is-link"); }
     });
-}
+    document.addEventListener("mouseleave", () => { cur.style.opacity = "0"; });
+    document.addEventListener("mouseenter", () => { cur.style.opacity = "1"; });
+  }
 
-/**
- * Lazy load images when they come into viewport
- */
-function initLazyLoading() {
-    const imageObserver = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const img = entry.target;
-                if (img.dataset.src) {
-                    img.src = img.dataset.src;
-                    img.removeAttribute('data-src');
-                    observer.unobserve(img);
-                }
-            }
-        });
+  /* ==========================================================================
+     10. SMOOTH ANCHOR SCROLL (honours reduced motion via CSS)
+     ========================================================================== */
+  function startAnchors() {
+    $$('a[href^="#"]').forEach((a) => {
+      a.addEventListener("click", (e) => {
+        const id = a.getAttribute("href");
+        if (id.length < 2) return;
+        const target = document.querySelector(id);
+        if (!target) return;
+        e.preventDefault();
+        target.scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth", block: "start" });
+        history.replaceState(null, "", id);
+      });
     });
+  }
 
-    document.querySelectorAll('img[data-src]').forEach(img => {
-        imageObserver.observe(img);
-    });
-}
+  /* ==========================================================================
+     BOOT
+     ========================================================================== */
+  function init() {
+    renderMasthead();
+    renderHero();
+    renderWork();
+    renderAbout();
+    renderPhotography();
+    renderReading();
+    renderConnect();
+    renderColophon();
 
-/**
- * Performance monitoring (optional - for development)
- */
-function logPerformance() {
-    if (window.performance && window.performance.timing) {
-        window.addEventListener('load', () => {
-            const perfData = window.performance.timing;
-            const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
-            console.log(`Page Load Time: ${pageLoadTime}ms`);
-        });
-    }
-}
+    startTheme();
+    startStatus();
+    startMenu();
+    startAnchors();
+    startReveals();
+    startSectionObserver();
+    startCursor();
+  }
 
-/**
- * Initialize cycling text animation for hero section
- */
-function initCyclingText() {
-    const cyclingElement = document.getElementById('cycling-text');
-    if (!cyclingElement) return;
-
-    const phrases = [
-        'BUILDING SCALABLE SYSTEMS',
-        'CREATING APPLICATIONS',
-        'NETWORKING',
-        'READING BOOKS',
-        'CREATIVE PHOTOGRAPHY'
-    ];
-    let currentIndex = 0;
-
-    function updateText() {
-        // Add fade-out effect
-        cyclingElement.style.opacity = '0';
-        cyclingElement.style.transform = 'translateY(-10px)';
-
-        setTimeout(() => {
-            // Change text with proper coloring
-            currentIndex = (currentIndex + 1) % phrases.length;
-            const phrase = phrases[currentIndex];
-            const words = phrase.split(' ');
-
-            let styledText = '';
-            if (words.length === 1) {
-                // Single word - make it yellow
-                styledText = `<span class="word-yellow">${words[0]}</span>`;
-            } else {
-                // Multiple words - all cyan except last one yellow
-                for (let i = 0; i < words.length; i++) {
-                    if (i === words.length - 1) {
-                        styledText += `<span class="word-yellow">${words[i]}</span>`;
-                    } else {
-                        styledText += `<span class="word-cyan">${words[i]}</span>`;
-                        if (i < words.length - 1) styledText += ' ';
-                    }
-                }
-            }
-
-            cyclingElement.innerHTML = styledText;
-
-            // Fade back in
-            cyclingElement.style.opacity = '1';
-            cyclingElement.style.transform = 'translateY(0)';
-        }, 300);
-    }
-
-    // Initial setup
-    const initialPhrase = phrases[0];
-    const initialWords = initialPhrase.split(' ');
-    let initialStyledText = '';
-
-    if (initialWords.length === 1) {
-        initialStyledText = `<span class="word-yellow">${initialWords[0]}</span>`;
-    } else {
-        for (let i = 0; i < initialWords.length; i++) {
-            if (i === initialWords.length - 1) {
-                initialStyledText += `<span class="word-yellow">${initialWords[i]}</span>`;
-            } else {
-                initialStyledText += `<span class="word-cyan">${initialWords[i]}</span>`;
-                if (i < initialWords.length - 1) initialStyledText += ' ';
-            }
-        }
-    }
-
-    cyclingElement.innerHTML = initialStyledText;
-
-    // Start cycling
-    setInterval(updateText, 2000);
-}
-
-/**
- * Error boundary for graceful error handling
- */
-window.addEventListener('error', (event) => {
-    console.error('Application Error:', event.error);
-    // Could send to error tracking service here
-});
-
-/**
- * Initialize application
- */
-function init() {
-    // Render all content
-    render();
-
-    // Initialize features
-    initKeyboardNavigation();
-    initSmoothScroll();
-    initHistoryNavigation();
-    initCyclingText();
-
-    // Add event listeners
-    document.addEventListener('keydown', handleEscapeKey);
-    document.getElementById('project-overlay')?.addEventListener('click', handleOverlayClick);
-    document.getElementById('lightbox')?.addEventListener('click', handleOverlayClick);
-
-    // Optional: Performance logging in development
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        logPerformance();
-    }
-
-    console.log('Portfolio initialized successfully');
-}/**
- * Run initialization when DOM is ready
- */
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-} else {
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
     init();
-}
+  }
+})();
