@@ -157,7 +157,7 @@ Top to bottom:
 
 ### 5.2 Photography (`photography/index.html`)
 
-- Page header: serif title (e.g. "Deep Field"), mono subline: plate count,
+- Page header: serif title **"Deep Field"**, mono subline: plate count,
   camera (`photography.gear`), themes.
 - **Plates:** centred column (~720–880px). Landscape/square images one per
   row; two consecutive portrait images may pair side by side. Under each:
@@ -174,13 +174,14 @@ Top to bottom:
 
 ### 5.3 Books (`books/index.html`)
 
-- Page header: serif title (e.g. "The Archive"), mono subline
+- Page header: serif title **"The Archive"**, mono subline
   ("A shelf, not a table · N volumes").
 - **In progress:** each book gets room — serif title, author, mono tag, and
   the personal `note` as an italic pull-quote with an amber left rule.
 - **Finished:** compressed ruled lines — serif title + author inline, mono tag
-  right. Optional `note` renders as the same italic quote, smaller. If `year`
-  is present on entries, group by year descending; otherwise one list.
+  right. Optional `note` renders as the same italic quote, smaller. If **all**
+  finished entries have `year`, group by year descending; if any entry lacks
+  it, render one flat list (no mixed grouping).
 
 ## 6. Removed from EVENT HORIZON
 
