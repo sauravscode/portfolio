@@ -2,8 +2,8 @@
    data.js — THE SINGLE SOURCE OF TRUTH
    ----------------------------------------------------------------------------
    Everything content-specific lives here. To update the site, edit THIS FILE
-   ONLY — never touch index.html, the CSS, app.js, or space.js. The page reads
-   from this object and renders itself.
+   ONLY — never touch the HTML pages, the CSS, or app.js. The pages read
+   from this object and render themselves.
 
    Quick reference:
      • site         → name, role, location, email, social links
