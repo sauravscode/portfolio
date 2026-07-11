@@ -133,8 +133,65 @@ function renderHero() {
   document.getElementById("hero-deck").textContent = D.hero.deck;
 }
 
-/* Stubs — replaced by Tasks 2, 3, 4. */
-function renderWork() {}
+function renderWork() {
+  const featured = D.work.find((w) => w.featured) || D.work[0];
+  const rest = D.work.filter((w) => w !== featured);
+
+  /* flagship */
+  const art = document.getElementById("work-featured");
+  art.classList.add("reveal");
+
+  const head = el("div", "feat-head");
+  head.append(
+    el("h3", "feat-name serif", featured.name),
+    el("span", "feat-year mono-label", featured.year)
+  );
+
+  const man = el("dl", "feat-manifest");
+  for (const [k, v] of Object.entries(featured.manifest || {})) {
+    const item = el("div", "feat-manifest-item");
+    item.append(
+      el("dt", "mono-label", k),
+      el("dd", "mono-label", String(v))
+    );
+    man.append(item);
+  }
+
+  const links = el("div", "feat-links");
+  for (const l of featured.links || []) links.append(extLink("link-line", l.label, l.href));
+
+  art.append(
+    head,
+    el("p", "feat-tagline", featured.tagline),
+    el("p", "feat-desc", featured.description),
+    man,
+    el("p", "feat-stack mono-label", (featured.stack || []).join(" · ")),
+    links
+  );
+
+  /* index rows */
+  const ol = document.getElementById("work-index");
+  rest.forEach((w, i) => {
+    const li = el("li", "work-row reveal");
+    li.style.setProperty("--d", `${i * 80}ms`);
+    const a = (w.links && w.links[0])
+      ? extLink("work-row-link", "", w.links[0].href)
+      : el("div", "work-row-link");
+    a.append(
+      el("span", "work-row-idx mono-label", String(i + 2).padStart(3, "0")),
+      (() => {
+        const t = el("span", "work-row-main");
+        t.append(el("span", "work-row-name serif", w.name),
+                 el("span", "work-row-tag", w.tagline));
+        return t;
+      })(),
+      el("span", "work-row-year mono-label", w.year),
+      el("span", "work-row-status mono-label", (w.manifest && w.manifest.Status) || "")
+    );
+    li.append(a);
+    ol.append(li);
+  });
+}
 function renderAbout() {}
 function renderDoorways() {}
 function renderContact() {}
