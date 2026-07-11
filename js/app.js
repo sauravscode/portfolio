@@ -192,7 +192,23 @@ function renderWork() {
     ol.append(li);
   });
 }
-function renderAbout() {}
+function renderAbout() {
+  const body = document.getElementById("about-body");
+  D.about.paragraphs.forEach((p, i) => {
+    const node = el("p", "reveal", p);
+    node.style.setProperty("--d", `${i * 80}ms`);
+    body.append(node);
+  });
+
+  const log = document.getElementById("about-log");
+  log.parentElement.classList.add("reveal");
+  for (const n of D.about.notes) {
+    log.append(
+      el("dt", "mono-label", n.k),
+      el("dd", null, n.v)
+    );
+  }
+}
 function renderDoorways() {}
 function renderContact() {}
 function renderEpigraph() {}

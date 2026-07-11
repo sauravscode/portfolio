@@ -328,3 +328,25 @@ a:hover { color: var(--accent-bright); }
   .work-row-link { grid-template-columns: 2.2rem 1fr; }
   .work-row-year, .work-row-status { display: none; }
 }
+
+/* ---- 10 · about --------------------------------------------------------------- */
+.about-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(240px, 1fr);
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: start;
+}
+@media (max-width: 820px) { .about-grid { grid-template-columns: 1fr; } }
+
+.about-body p { margin: 0 0 1.3rem; max-width: 40rem; }
+.about-body p:last-child { margin-bottom: 0; }
+
+.about-log {
+  border-left: 1px solid var(--hairline);
+  padding-left: clamp(1.2rem, 2.5vw, 2rem);
+}
+.about-log-head { color: var(--accent); margin: 0 0 1rem; }
+.about-log dl { margin: 0; }
+.about-log dt { margin: .9rem 0 .15rem; }
+.about-log dt:first-of-type { margin-top: 0; }
+.about-log dd { margin: 0; font-size: .85rem; color: var(--text); }
