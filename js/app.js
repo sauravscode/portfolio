@@ -125,6 +125,18 @@ function initReveals() {
   items.forEach((n) => io.observe(n));
 }
 
+/* ---- images -------------------------------------------------------------- */
+function cloudReady() {
+  const c = D.photography.cloudName;
+  return Boolean(c) && c !== "your-cloud-name";
+}
+
+/** Build a Cloudinary delivery URL. `extra` is an optional transform suffix. */
+function cldUrl(publicId, w, extra = "") {
+  return `https://res.cloudinary.com/${D.photography.cloudName}` +
+         `/image/upload/f_auto,q_auto,w_${w},c_limit${extra}/${publicId}`;
+}
+
 /* ---- home ---------------------------------------------------------------------- */
 function renderHero() {
   document.getElementById("hero-eyebrow").textContent =
@@ -209,9 +221,60 @@ function renderAbout() {
     );
   }
 }
-function renderDoorways() {}
-function renderContact() {}
-function renderEpigraph() {}
+function renderDoorways() {
+  /* Photography doorway */
+  const dp = document.getElementById("door-photo");
+  const first = D.photography.photos[0];
+  if (first && /^(https?:\/\/|\/)/.test(first.publicId)) {
+    dp.style.backgroundImage = `url("${first.publicId}")`;
+  } else if (first && cloudReady()) {
+    dp.style.backgroundImage = `url("${cldUrl(first.publicId, 1200)}")`;
+  }
+  const dpInner = el("span", "doorway-inner");
+  dpInner.append(
+    el("span", "doorway-label mono-label", "DEEP FIELD"),
+    el("span", "doorway-title serif", "Photography"),
+    el("span", "doorway-sub mono-label",
+      `${D.photography.photos.length} PLATES · ${D.photography.gear.toUpperCase()} →`)
+  );
+  dp.append(dpInner);
+
+  /* Books doorway */
+  const db = document.getElementById("door-books");
+  const top = D.reading.current[0];
+  const dbInner = el("span", "doorway-inner");
+  const volumes = D.reading.current.length + D.reading.finished.length;
+  dbInner.append(
+    el("span", "doorway-label mono-label", "THE ARCHIVE"),
+    el("span", "doorway-title serif", "Books"),
+    el("span", "doorway-sub mono-label", `${volumes} VOLUMES →`)
+  );
+  if (top && top.note) {
+    dbInner.insertBefore(
+      el("span", "doorway-quote serif", `“${top.note}”`),
+      dbInner.lastChild
+    );
+  }
+  db.append(dbInner);
+}
+
+function renderContact() {
+  const mail = document.getElementById("contact-mail");
+  mail.href = `mailto:${D.site.email}`;
+  mail.textContent = D.site.email;
+
+  const links = document.getElementById("contact-links");
+  links.classList.add("reveal");
+  links.style.setProperty("--d", "240ms");
+  for (const [name, href] of Object.entries(D.site.socials)) {
+    links.append(extLink("link-line", name, href));
+  }
+}
+
+function renderEpigraph() {
+  document.getElementById("epigraph-text").textContent = `“${D.hero.quote}”`;
+  document.getElementById("epigraph-author").textContent = `— ${D.hero.quoteAuthor}`;
+}
 
 function renderHome() {
   renderHero();
