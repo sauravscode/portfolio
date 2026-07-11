@@ -559,3 +559,49 @@ a:hover { color: var(--accent-bright); }
   .lb-prev { left: 1rem; }
   .lb-next { right: 1rem; }
 }
+
+/* ---- 15 · books / marginalia ------------------------------------------------------ */
+.shelves { padding-bottom: clamp(3rem, 8vh, 5rem); }
+
+.shelf { list-style: none; margin: 0 0 clamp(2.5rem, 6vh, 4rem); padding: 0; }
+.shelf-label { color: var(--accent); margin: 0 0 .5rem; }
+
+.book-current {
+  padding: 1.4rem 0 1.2rem;
+  border-bottom: 1px solid rgba(224, 146, 54, .16);
+}
+.book-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.book-title { font-size: 1.4rem; font-weight: 400; }
+.book-tag { color: var(--accent); }
+.book-author { margin: .2rem 0 0; font-size: .85rem; color: var(--text-dim); }
+
+.book-note {
+  margin: .9rem 0 0;
+  padding-left: 1rem;
+  border-left: 2px solid rgba(224, 146, 54, .4);
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: 1rem;
+  max-width: 34rem;
+}
+.book-note--small { font-size: .9rem; margin-top: .5rem; }
+
+.book-row { padding: .85rem 0; border-bottom: 1px solid var(--hairline); }
+.book-row-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.book-row-title { font-size: 1.05rem; font-weight: 400; }
+.book-row-author { font-family: var(--sans); font-size: .82rem; color: var(--text-dim); }
+
+.shelf-year { padding: 1.6rem 0 .4rem; }
+.shelf-year .mono-label { color: var(--accent); }

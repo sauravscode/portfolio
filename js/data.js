@@ -216,6 +216,8 @@ const DATA = {
 
   /* --------------------------------------------------------------------------
      READING — two shelves. `note` is optional and shown small, in your voice.
+     `year` (optional, number) on finished books: when EVERY finished entry
+     has one, the shelf groups by year, newest first; otherwise one flat list.
      -------------------------------------------------------------------------- */
   reading: {
     current: [

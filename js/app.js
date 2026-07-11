@@ -458,6 +458,57 @@ function renderHome() {
   renderEpigraph();
 }
 
+/* ---- books ---------------------------------------------------------------------- */
+function bookCurrent(b, i) {
+  const li = el("li", "book-current reveal");
+  li.style.setProperty("--d", `${i * 80}ms`);
+  const head = el("div", "book-head");
+  head.append(
+    el("span", "book-title serif", b.title),
+    el("span", "book-tag mono-label", b.tag || "")
+  );
+  li.append(head, el("p", "book-author", b.author));
+  if (b.note) li.append(el("p", "book-note serif", `“${b.note}”`));
+  return li;
+}
+
+function bookRow(b, i) {
+  const li = el("li", "book-row reveal");
+  li.style.setProperty("--d", `${(i % 8) * 60}ms`);
+  const line = el("div", "book-row-line");
+  const t = el("span", "book-row-title serif", b.title);
+  t.append(el("span", "book-row-author", ` — ${b.author}`));
+  line.append(t, el("span", "book-tag mono-label", b.tag || ""));
+  li.append(line);
+  if (b.note) li.append(el("p", "book-note book-note--small serif", `“${b.note}”`));
+  return li;
+}
+
+function renderBooks() {
+  const current = D.reading.current;
+  const finished = D.reading.finished;
+
+  document.getElementById("books-count").textContent =
+    `A SHELF, NOT A TABLE · ${current.length + finished.length} VOLUMES`;
+
+  const cur = document.getElementById("shelf-current");
+  current.forEach((b, i) => cur.append(bookCurrent(b, i)));
+
+  const fin = document.getElementById("shelf-finished");
+  const grouped = finished.length > 0 && finished.every((b) => b.year);
+  if (grouped) {
+    const years = [...new Set(finished.map((b) => b.year))].sort((a, b) => b - a);
+    for (const y of years) {
+      const yl = el("li", "shelf-year reveal");
+      yl.append(el("span", "mono-label", String(y)));
+      fin.append(yl);
+      finished.filter((b) => b.year === y).forEach((b, i) => fin.append(bookRow(b, i)));
+    }
+  } else {
+    finished.forEach((b, i) => fin.append(bookRow(b, i)));
+  }
+}
+
 /* ---- boot ------------------------------------------------------------------------ */
 if (!D) {
   console.error("window.DATA missing — is js/data.js loaded?");
@@ -466,6 +517,7 @@ if (!D) {
   renderFooter();
   if (PAGE === "home") renderHome();
   if (PAGE === "photography") { renderPhotography(); initLightbox(); }
+  if (PAGE === "books") renderBooks();
   initClock();
   initNavToggle();
   initReveals();
