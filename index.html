@@ -1,16 +1,15 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="void">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <title>Saurav Sudhar — Software · Infrastructure Engineer</title>
-  <meta name="description" content="Saurav Sudhar builds Kubernetes infrastructure for NHS Trusted Research Environments — and photographs the structure of light. A portfolio rendered around a gravitationally-lensed black hole." />
+  <meta name="description" content="Software and infrastructure engineer building Kubernetes platforms for NHS Trusted Research Environments. Night photography and a reading list alongside." />
   <meta name="author" content="Saurav Sudhar" />
-  <meta name="theme-color" content="#04050d" />
+  <meta name="theme-color" content="#0B0A08" />
   <meta name="color-scheme" content="dark" />
 
-  <!-- Security: lock scripts to same-origin; allow only the resources we use. -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self';
     script-src 'self';
@@ -24,266 +23,91 @@
   " />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
 
-  <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Saurav Sudhar — Software · Infrastructure Engineer" />
-  <meta property="og:description" content="Kubernetes infrastructure for NHS research, and the structure of light — rendered around a black hole." />
+  <meta property="og:description" content="Kubernetes infrastructure for NHS research — and the structure of light." />
 
-  <!-- Fonts: Space Grotesk (display + UI), JetBrains Mono (telemetry),
-       Fraunces italic (reserved for the Clarke quote). Swap = instant paint. -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,300;1,9..144,400&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" />
-
-  <link rel="preload" as="style" href="css/styles.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,300..400&family=IBM+Plex+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" />
   <link rel="stylesheet" href="css/styles.css" />
 
-  <!-- Favicon: a tiny black hole — amber photon ring around the shadow. -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><radialGradient id='g' cx='50%25' cy='50%25' r='50%25'><stop offset='52%25' stop-color='%2304050d'/><stop offset='62%25' stop-color='%23ffb45e'/><stop offset='72%25' stop-color='%23ff7a3c'/><stop offset='100%25' stop-color='%2304050d'/></radialGradient></defs><rect width='100' height='100' fill='%2304050d'/><ellipse cx='50' cy='50' rx='46' ry='12' fill='none' stroke='%23ffb45e' stroke-width='4' opacity='.85'/><circle cx='50' cy='50' r='26' fill='url(%23g)'/><circle cx='50' cy='50' r='15' fill='%23000'/></svg>" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230B0A08'/><circle cx='50' cy='50' r='30' fill='none' stroke='%23E09236' stroke-width='7'/><circle cx='50' cy='50' r='9' fill='%23E09236'/></svg>" />
 
-  <!-- Critical, above-the-fold paint so the void shows instantly. -->
-  <style>
-    html{background:#04050d;color-scheme:dark}
-    body{margin:0;background:transparent;color:#e8ecfa;
-      font-family:"Space Grotesk",system-ui,-apple-system,sans-serif}
-    .js-loading main{opacity:0}
-  </style>
-
-  <!-- Content lives in data.js (global window.DATA). Loaded first, no defer,
-       so it's ready before the modules render the page. -->
+  <style>html{background:#0B0A08;color-scheme:dark}</style>
   <script src="js/data.js"></script>
 </head>
 
-<body class="js-loading">
+<body data-page="home">
   <noscript>
-    <div class="noscript">
-      This portfolio renders a black hole in WebGL. Enable JavaScript for the
-      full experience — or reach me at sauravsnair99@gmail.com.
-    </div>
+    <p class="noscript">This site renders its content with JavaScript.
+    Reach me at sauravsnair99@gmail.com.</p>
   </noscript>
 
-  <!-- ===== Ambient layers (decorative, never capture pointer) ===== -->
-  <canvas class="stage" id="stage" aria-hidden="true"></canvas>     <!-- WebGL universe -->
-  <div class="veil" id="veil" aria-hidden="true"></div>             <!-- darkens behind scrolled content -->
-  <canvas class="fx" id="fx" aria-hidden="true"></canvas>           <!-- 2D particles + cursor trail -->
-  <div class="scanlines" aria-hidden="true"></div>
+  <div class="glow" id="glow" aria-hidden="true"></div>
   <div class="grain" aria-hidden="true"></div>
-  <div class="vignette" aria-hidden="true"></div>
-  <div class="cursor" id="cursor" aria-hidden="true">
-    <span class="cursor__ring"></span>
-    <span class="cursor__dot"></span>
-    <span class="cursor__label mono"></span>
-  </div>
 
-  <!-- ===== Boot sequence (fades away; content lives underneath) ===== -->
-  <div class="boot" id="boot" aria-hidden="true">
-    <div class="boot__inner mono">
-      <span class="boot__line" data-d="0">› uplink established</span>
-      <span class="boot__line" data-d="1">› calibrating event horizon</span>
-      <span class="boot__line" data-d="2">› spooling warp drive</span>
-      <span class="boot__line boot__line--ok" data-d="3">› all systems nominal — entering the void</span>
-    </div>
-    <div class="boot__bar"><span class="boot__fill"></span></div>
-    <span class="boot__skip mono">click to skip</span>
-  </div>
+  <a class="skip-link" href="#work">Skip to content</a>
 
-  <!-- ===== Ship console (⌘K / "/") ===== -->
-  <div class="console" id="console" role="dialog" aria-modal="true" aria-label="Ship console" hidden>
-    <div class="console__panel">
-      <div class="console__head mono">
-        <span class="console__sigil" aria-hidden="true">◉</span>
-        SHIP CONSOLE
-        <span class="console__hint">esc to close</span>
+  <header class="site-head" id="site-head"></header>
+
+  <main>
+    <section class="hero" aria-label="Introduction">
+      <div class="wrap">
+        <p class="hero-eyebrow mono-label reveal" id="hero-eyebrow"></p>
+        <h1 class="hero-statement serif reveal" id="hero-statement" style="--d:80ms"></h1>
+        <p class="hero-deck reveal" id="hero-deck" style="--d:160ms"></p>
       </div>
-      <input class="console__input mono" id="console-input" type="text"
-             placeholder="type a command — try: goto work · email · help"
-             autocomplete="off" autocapitalize="off" spellcheck="false"
-             aria-label="Command input" />
-      <ul class="console__list" id="console-list" role="listbox"></ul>
-      <div class="console__out mono" id="console-out" aria-live="polite"></div>
-    </div>
-  </div>
+    </section>
 
-  <a class="skip-link" href="#work">Skip to work</a>
+    <section class="section work" id="work" aria-labelledby="work-title">
+      <div class="wrap">
+        <header class="section-head reveal">
+          <p class="section-label mono-label">01 — SELECTED SYSTEMS</p>
+          <h2 class="section-title serif" id="work-title">Selected Systems</h2>
+        </header>
+        <article class="work-featured" id="work-featured"></article>
+        <ol class="work-index" id="work-index"></ol>
+      </div>
+    </section>
 
-  <!-- ===== Route map: the voyage, left edge (JS builds waypoints) ===== -->
-  <nav class="route" id="route" aria-label="Sections"></nav>
+    <section class="section about" id="about" aria-labelledby="about-title">
+      <div class="wrap">
+        <header class="section-head reveal">
+          <p class="section-label mono-label">02 — THE OPERATOR</p>
+          <h2 class="section-title serif" id="about-title">About</h2>
+        </header>
+        <div class="about-grid">
+          <div class="about-body" id="about-body"></div>
+          <aside class="about-log" aria-label="Field log">
+            <p class="mono-label about-log-head">FIELD LOG</p>
+            <dl id="about-log"></dl>
+          </aside>
+        </div>
+      </div>
+    </section>
 
-  <!-- ===== Telemetry HUD, bottom left ===== -->
-  <aside class="hud mono" id="hud" aria-hidden="true">
-    <div class="hud__row"><span class="hud__k">SECTOR</span><b id="hud-sector">00 · ARRIVAL</b></div>
-    <div class="hud__row"><span class="hud__k">VEL</span><b id="hud-vel">0.000c</b></div>
-    <div class="hud__row"><span class="hud__k">LOC</span><b id="hud-loc">—</b></div>
-    <div class="hud__row"><span class="hud__k">T+</span><b id="hud-uptime">00:00</b></div>
-    <div class="hud__row"><span class="hud__k">FPS</span><b id="hud-fps">—</b></div>
-  </aside>
-
-  <!-- ===== Header / flight deck ===== -->
-  <header class="deck" id="deck">
-    <a class="deck__brand" href="#top" aria-label="Saurav Sudhar — home">
-      <span class="deck__mark" aria-hidden="true"></span>
-      <span class="deck__name" id="brand-name">Saurav Sudhar</span>
-      <span class="deck__role mono" id="brand-role">Software · Infrastructure Engineer</span>
-    </a>
-
-    <nav class="nav" id="primary-nav" aria-label="Primary">
-      <a href="#work" data-nav><span class="nav__idx mono">01</span>Work</a>
-      <a href="#about" data-nav><span class="nav__idx mono">02</span>Operator</a>
-      <a href="#photography" data-nav><span class="nav__idx mono">03</span>Deep&nbsp;Field</a>
-      <a href="#reading" data-nav><span class="nav__idx mono">04</span>Archive</a>
-      <a href="#connect" data-nav><span class="nav__idx mono">05</span>Channel</a>
+    <nav class="doorways" aria-label="Photography and books">
+      <a class="doorway doorway--photo reveal" id="door-photo" href="photography/"></a>
+      <a class="doorway doorway--books reveal" id="door-books" href="books/"></a>
     </nav>
 
-    <div class="deck__aside">
-      <span class="telemetry mono" id="telemetry" title="Live local time">
-        <span class="telemetry__dot" aria-hidden="true"></span>
-        <span id="telemetry-text">reconciling…</span>
-      </span>
-      <button class="hud-btn mono" id="console-toggle" type="button" title="Open the ship console (⌘K)">
-        ⌘K
-      </button>
-      <button class="hud-btn mono" id="audio-toggle" type="button"
-              aria-pressed="false" title="Toggle engine hum (generative audio)">
-        SND
-      </button>
-      <button class="hud-btn mono" id="motion-toggle" type="button"
-              aria-pressed="false" title="Toggle motion &amp; effects">
-        FX
-      </button>
-      <button class="menu-toggle" id="menu-toggle" type="button"
-              aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </header>
-
-  <main id="top">
-
-    <!-- ===================== §00 — ARRIVAL ===================== -->
-    <section class="hero section" id="hero" data-index="00" data-label="Arrival">
-      <div class="hero__inner">
-        <p class="hero__eyebrow mono" id="hero-eyebrow"></p>
-        <h1 class="hero__name" id="hero-name" aria-label="Saurav Sudhar"></h1>
-        <p class="hero__statement" id="hero-statement"></p>
-
-        <figure class="quote" id="hero-quote">
-          <span class="quote__rule" aria-hidden="true"></span>
-          <blockquote class="quote__text" id="quote-text"></blockquote>
-          <figcaption class="quote__author mono" id="quote-author"></figcaption>
-          <span class="quote__rule" aria-hidden="true"></span>
-        </figure>
-
-        <p class="hero__deck" id="hero-deck"></p>
-      </div>
-
-      <a class="hero__scroll mono" href="#work" aria-label="Scroll to work">
-        <span>BEGIN DESCENT</span>
-        <span class="hero__scroll-line" aria-hidden="true"></span>
-      </a>
-    </section>
-
-    <!-- ===================== §01 — THE FORGE ===================== -->
-    <section class="section work" id="work" data-index="01" data-label="Forge">
-      <div class="section__head">
-        <span class="section__watermark mono" aria-hidden="true">01</span>
-        <span class="section__num mono">SECTOR 01 / THE FORGE</span>
-        <h2 class="section__title" data-scramble>Selected Systems</h2>
-        <p class="section__sub mono" data-reveal>Infrastructure, tools, and research platforms in service</p>
-      </div>
-      <div id="work-featured"></div>
-      <ol class="work__list" id="work-list"></ol>
-    </section>
-
-    <!-- ===================== §02 — THE OPERATOR ===================== -->
-    <section class="section about" id="about" data-index="02" data-label="Operator">
-      <div class="section__head">
-        <span class="section__watermark mono" aria-hidden="true">02</span>
-        <span class="section__num mono">SECTOR 02 / THE OPERATOR</span>
-        <h2 class="section__title" data-scramble>Who Keeps the Lights On</h2>
-        <p class="section__sub mono" data-reveal>Profile · field log · telemetry</p>
-      </div>
-      <div class="about__grid">
-        <div class="about__body" id="about-body"></div>
-        <aside class="about__notes panel" aria-label="Field log">
-          <span class="about__notes-head mono">FIELD LOG</span>
-          <dl id="about-notes"></dl>
-        </aside>
+    <section class="section contact" id="contact" aria-labelledby="contact-title">
+      <div class="wrap">
+        <p class="section-label mono-label reveal">03 — CONTACT</p>
+        <h2 class="contact-title serif reveal" id="contact-title" style="--d:80ms">Let&rsquo;s build something that stays&nbsp;up.</h2>
+        <a class="contact-mail reveal" id="contact-mail" href="#" style="--d:160ms"></a>
+        <div class="contact-links" id="contact-links"></div>
       </div>
     </section>
 
-    <!-- ===================== §03 — DEEP FIELD ===================== -->
-    <section class="section photo" id="photography" data-index="03" data-label="Deep Field">
-      <div class="section__head">
-        <span class="section__watermark mono" aria-hidden="true">03</span>
-        <span class="section__num mono">SECTOR 03 / DEEP FIELD</span>
-        <h2 class="section__title" data-scramble>Photography</h2>
-        <p class="section__sub mono" id="photo-sub" data-reveal>Landscape · architecture · the behaviour of light</p>
-      </div>
-      <div class="gallery" id="gallery"></div>
-      <a class="photo__more mono" id="photo-instagram" href="#" target="_blank" rel="noopener noreferrer">
-        Full transmission on Instagram <span aria-hidden="true">→</span>
-      </a>
-    </section>
-
-    <!-- ===================== §04 — THE ARCHIVE ===================== -->
-    <section class="section reading" id="reading" data-index="04" data-label="Archive">
-      <div class="section__head">
-        <span class="section__watermark mono" aria-hidden="true">04</span>
-        <span class="section__num mono">SECTOR 04 / THE ARCHIVE</span>
-        <h2 class="section__title" data-scramble>Reading</h2>
-        <p class="section__sub mono" data-reveal>A shelf, not a table</p>
-      </div>
-      <div class="reading__grid">
-        <div class="reading__col">
-          <span class="reading__shelf-label mono">▸ CURRENTLY READING</span>
-          <ul class="shelf" id="shelf-current"></ul>
-        </div>
-        <div class="reading__col">
-          <span class="reading__shelf-label mono">▸ FINISHED</span>
-          <ul class="shelf" id="shelf-finished"></ul>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===================== §05 — OPEN CHANNEL ===================== -->
-    <section class="section connect" id="connect" data-index="05" data-label="Channel">
-      <div class="connect__inner">
-        <span class="section__num mono">SECTOR 05 / OPEN CHANNEL</span>
-        <h2 class="connect__title" id="connect-title" data-scramble>Let's build something that stays up.</h2>
-        <a class="connect__mail" id="connect-mail" href="#">
-          <span id="connect-mail-text"></span>
-          <span class="connect__mail-line" aria-hidden="true"></span>
-        </a>
-        <div class="connect__links" id="connect-links"></div>
-        <p class="connect__hint mono">or press <kbd>⌘K</kbd> and type <b>email</b></p>
-      </div>
-    </section>
+    <figure class="epigraph reveal">
+      <blockquote class="epigraph-text serif" id="epigraph-text"></blockquote>
+      <figcaption class="epigraph-author mono-label" id="epigraph-author"></figcaption>
+    </figure>
   </main>
 
-  <!-- ===================== COLOPHON ===================== -->
-  <footer class="colophon">
-    <div class="colophon__row mono">
-      <span id="colophon-name"></span>
-      <span id="colophon-coords"></span>
-      <span>Rendered around a black hole — WebGL · vanilla JS · zero frameworks</span>
-      <span id="colophon-year"></span>
-    </div>
-  </footer>
-
-  <!-- ===================== LIGHTBOX ===================== -->
-  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true"
-       aria-label="Photograph viewer" hidden>
-    <button class="lightbox__close" id="lb-close" aria-label="Close viewer">✕</button>
-    <button class="lightbox__nav lightbox__nav--prev" id="lb-prev" aria-label="Previous">‹</button>
-    <figure class="lightbox__figure">
-      <img id="lb-img" alt="" />
-      <figcaption class="lightbox__cap mono" id="lb-cap"></figcaption>
-    </figure>
-    <button class="lightbox__nav lightbox__nav--next" id="lb-next" aria-label="Next">›</button>
-  </div>
-
-  <!-- ===================== TOAST (easter eggs, console feedback) ===== -->
-  <div class="toast mono" id="toast" role="status" aria-live="polite" hidden></div>
+  <footer class="site-foot" id="site-foot"></footer>
 
   <script type="module" src="js/app.js"></script>
 </body>

@@ -7,7 +7,7 @@
 
    Quick reference:
      • site         → name, role, location, email, social links
-     • hero         → the opening sequence (name, statement, the Clarke quote)
+     • hero         → statement, deck, and the Clarke quote (now the footer epigraph)
      • work         → projects (first entry = the featured "primary system")
      • about        → operator profile paragraphs + telemetry "field log"
      • photography  → Cloudinary cloud name + the photo list + Instagram
@@ -43,7 +43,6 @@ const DATA = {
      `statement` is the short human line under the name ({{ }} = accent).
      -------------------------------------------------------------------------- */
   hero: {
-    eyebrow: "Infrastructure for healthcare research",
     name: "Saurav Sudhar",
     role: "Software · Infrastructure Engineer",
     statement:
