@@ -509,6 +509,22 @@ function renderBooks() {
   }
 }
 
+/* ---- parallax --------------------------------------------------------------------- */
+function initParallax() {
+  const glow = document.getElementById("glow");
+  if (!glow || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  let ticking = false;
+  addEventListener("scroll", () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      /* glow drifts up slowly as you descend — max ~60px */
+      glow.style.setProperty("--par", String(Math.min(scrollY * 0.06, 60) * -1));
+      ticking = false;
+    });
+  }, { passive: true });
+}
+
 /* ---- boot ------------------------------------------------------------------------ */
 if (!D) {
   console.error("window.DATA missing — is js/data.js loaded?");
@@ -521,4 +537,5 @@ if (!D) {
   initClock();
   initNavToggle();
   initReveals();
+  initParallax();
 }
