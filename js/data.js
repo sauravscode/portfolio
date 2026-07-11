@@ -190,6 +190,9 @@ const DATA = {
      `ratio` is width/height — it reserves space so the page never jumps while
      images load. 3:2 landscape = 1.5, 2:3 portrait = 0.667, square = 1.
 
+     `exif` (optional) is a short technical line shown under the plate,
+     e.g. "24mm · f/8 · 1/60 · ISO 100". Omit it and only the caption shows.
+
      No Cloudinary yet? Drop a full image URL in `publicId` and it is used as-is.
      -------------------------------------------------------------------------- */
   photography: {
@@ -197,7 +200,8 @@ const DATA = {
     instagram: "https://www.instagram.com/",
     gear: "Nikon Z50 II",
     photos: [
-      { publicId: "portfolio/photo-01", ratio: 1.5,  caption: "Northern fells, first light" },
+      { publicId: "portfolio/photo-01", ratio: 1.5,  caption: "Northern fells, first light",
+        exif: "24mm · f/8 · 1/60 · ISO 100" },
       { publicId: "portfolio/photo-02", ratio: 0.667, caption: "Concrete and sky" },
       { publicId: "portfolio/photo-03", ratio: 1.5,  caption: "Coast road" },
       { publicId: "portfolio/photo-04", ratio: 1,     caption: "Stairwell geometry" },

@@ -137,6 +137,93 @@ function cldUrl(publicId, w, extra = "") {
          `/image/upload/f_auto,q_auto,w_${w},c_limit${extra}/${publicId}`;
 }
 
+/** Resolve responsive sources for a photo, or null when no image is available.
+    publicId may be a Cloudinary public ID, a full URL, or a root-relative
+    same-origin path (e.g. "/test.jpg") — the latter two are used as-is. */
+function photoSources(p) {
+  if (/^(https?:\/\/|\/)/.test(p.publicId)) {
+    return { src: p.publicId, srcset: null, sizes: null, blur: null };
+  }
+  if (!cloudReady()) return null;
+  return {
+    src: cldUrl(p.publicId, 1200),
+    srcset: [480, 800, 1200, 1600].map((w) => `${cldUrl(p.publicId, w)} ${w}w`).join(", "),
+    sizes: "(max-width: 900px) 92vw, 820px",
+    blur: cldUrl(p.publicId, 60, ",e_blur:800,q_1"),
+  };
+}
+
+/** Plate figures in DOM order; the lightbox (Task 6) navigates this. */
+const plateImages = [];
+
+function plateFigure(p, num, idx) {
+  const fig = el("figure", "plate");
+  fig.dataset.idx = String(idx);
+
+  const frame = el("div", "plate-frame");
+  frame.style.aspectRatio = String(p.ratio || 1.5);
+
+  const s = photoSources(p);
+  if (s) {
+    const img = el("img");
+    img.alt = p.caption || "Photograph";
+    img.decoding = "async";
+    img.loading = num > 2 ? "lazy" : "eager";
+    if (s.blur) {
+      frame.classList.add("is-blur");
+      frame.style.backgroundImage = `url("${s.blur}")`;
+      img.addEventListener("load", () => frame.classList.add("is-loaded"), { once: true });
+    }
+    img.addEventListener("error", () => {
+      frame.replaceChildren();
+      frame.classList.remove("is-blur");
+      frame.classList.add("plate-pending");
+    }, { once: true });
+    img.src = s.src;
+    if (s.srcset) { img.srcset = s.srcset; img.sizes = s.sizes; }
+    frame.append(img);
+  } else {
+    frame.classList.add("plate-pending");
+  }
+
+  const cap = el("figcaption", "plate-cap");
+  cap.append(el("span", "mono-label plate-num",
+    `PLATE ${String(num).padStart(2, "0")} — ${(p.caption || "").toUpperCase()}`));
+  if (p.exif) cap.append(el("span", "mono-label plate-exif", p.exif));
+
+  fig.append(frame, cap);
+  plateImages.push({ index: idx, figure: fig });
+  return fig;
+}
+
+function renderPhotography() {
+  document.getElementById("photo-sub").textContent =
+    `${D.photography.photos.length} PLATES · ${D.photography.gear.toUpperCase()} · LANDSCAPE / ARCHITECTURE / LIGHT`;
+
+  const ig = document.getElementById("photo-instagram");
+  ig.href = D.photography.instagram;
+
+  const wrap = document.getElementById("plates");
+  const photos = D.photography.photos;
+  let i = 0;
+  let plateNo = 1;
+  while (i < photos.length) {
+    const p = photos[i];
+    const next = photos[i + 1];
+    if (p.ratio < 1 && next && next.ratio < 1) {
+      const pair = el("div", "plate-pair reveal");
+      pair.append(plateFigure(p, plateNo++, i), plateFigure(next, plateNo++, i + 1));
+      wrap.append(pair);
+      i += 2;
+    } else {
+      const fig = plateFigure(p, plateNo++, i);
+      fig.classList.add("reveal");
+      wrap.append(fig);
+      i += 1;
+    }
+  }
+}
+
 /* ---- home ---------------------------------------------------------------------- */
 function renderHero() {
   document.getElementById("hero-eyebrow").textContent =
@@ -292,6 +379,7 @@ if (!D) {
   renderHeader();
   renderFooter();
   if (PAGE === "home") renderHome();
+  if (PAGE === "photography") renderPhotography();
   initClock();
   initNavToggle();
   initReveals();
