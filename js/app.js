@@ -224,6 +224,92 @@ function renderPhotography() {
   }
 }
 
+/* ---- lightbox ---------------------------------------------------------------- */
+function initLightbox() {
+  const box = document.getElementById("lightbox");
+  if (!box) return;
+  const img = document.getElementById("lb-img");
+  const cap = document.getElementById("lb-cap");
+  const btnClose = document.getElementById("lb-close");
+  const btnPrev = document.getElementById("lb-prev");
+  const btnNext = document.getElementById("lb-next");
+
+  let current = -1;
+  let returnFocus = null;
+
+  /** Photos that actually have an image (placeholders are not viewable). */
+  const viewable = () => D.photography.photos
+    .map((p, i) => ({ p, i }))
+    .filter(({ p }) => photoSources(p) !== null);
+
+  function show(listPos) {
+    const list = viewable();
+    if (!list.length) return;
+    const pos = ((listPos % list.length) + list.length) % list.length;
+    current = pos;
+    const { p, i } = list[pos];
+    const s = photoSources(p);
+    img.src = s.src;
+    if (s.srcset) { img.srcset = s.srcset; img.sizes = "92vw"; } else { img.removeAttribute("srcset"); }
+    img.alt = p.caption || "Photograph";
+    cap.textContent = [`PLATE ${String(i + 1).padStart(2, "0")} — ${(p.caption || "").toUpperCase()}`, p.exif]
+      .filter(Boolean).join("   ·   ");
+  }
+
+  function open(photoIndex) {
+    const list = viewable();
+    const pos = list.findIndex(({ i }) => i === photoIndex);
+    if (pos === -1) return;
+    returnFocus = document.activeElement;
+    box.hidden = false;
+    document.body.style.overflow = "hidden";
+    show(pos);
+    btnClose.focus();
+  }
+
+  function close() {
+    box.hidden = true;
+    document.body.style.overflow = "";
+    if (returnFocus) returnFocus.focus();
+  }
+
+  btnClose.addEventListener("click", close);
+  btnPrev.addEventListener("click", () => show(current - 1));
+  btnNext.addEventListener("click", () => show(current + 1));
+  box.addEventListener("click", (e) => { if (e.target === box) close(); });
+
+  document.addEventListener("keydown", (e) => {
+    if (box.hidden) return;
+    if (e.key === "Escape") close();
+    else if (e.key === "ArrowLeft") show(current - 1);
+    else if (e.key === "ArrowRight") show(current + 1);
+    else if (e.key === "Tab") {
+      /* focus trap across the three buttons */
+      const focusables = [btnClose, btnPrev, btnNext];
+      const idx = focusables.indexOf(document.activeElement);
+      e.preventDefault();
+      const next = e.shiftKey
+        ? focusables[(idx - 1 + focusables.length) % focusables.length]
+        : focusables[(idx + 1) % focusables.length];
+      next.focus();
+    }
+  });
+
+  /* make plates that have an image clickable + keyboard-operable */
+  for (const { index, figure } of plateImages) {
+    if (photoSources(D.photography.photos[index]) === null) continue;
+    const frame = figure.querySelector(".plate-frame");
+    frame.tabIndex = 0;
+    frame.setAttribute("role", "button");
+    frame.setAttribute("aria-label", `View ${D.photography.photos[index].caption || "photograph"}`);
+    frame.style.cursor = "zoom-in";
+    frame.addEventListener("click", () => open(index));
+    frame.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(index); }
+    });
+  }
+}
+
 /* ---- home ---------------------------------------------------------------------- */
 function renderHero() {
   document.getElementById("hero-eyebrow").textContent =
@@ -379,7 +465,7 @@ if (!D) {
   renderHeader();
   renderFooter();
   if (PAGE === "home") renderHome();
-  if (PAGE === "photography") renderPhotography();
+  if (PAGE === "photography") { renderPhotography(); initLightbox(); }
   initClock();
   initNavToggle();
   initReveals();
