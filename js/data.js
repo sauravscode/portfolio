@@ -1,32 +1,35 @@
 /* ============================================================================
    data.js — THE SINGLE SOURCE OF TRUTH
    ----------------------------------------------------------------------------
-   Everything content-specific lives here. To update the site, edit this file
-   only — never touch the HTML, CSS, or app.js. The layout reads from this
-   object and renders itself.
+   Everything content-specific lives here. To update the site, edit THIS FILE
+   ONLY — never touch index.html, the CSS, app.js, or space.js. The page reads
+   from this object and renders itself.
 
    Quick reference:
      • site         → name, role, location, email, social links
-     • hero         → the opening statement
-     • work         → projects (order = display order; first one is featured)
-     • about        → bio paragraphs + "field notes" marginalia
+     • hero         → the opening sequence (name, statement, the Clarke quote)
+     • work         → projects (first entry = the featured "primary system")
+     • about        → operator profile paragraphs + telemetry "field log"
      • photography  → Cloudinary cloud name + the photo list + Instagram
      • reading      → currently-reading and finished shelves
+
+   A note on accents: anywhere you see {{ }}, the wrapped phrase is printed in
+   the holographic accent colour. Use it sparingly.
    ========================================================================== */
 
 const DATA = {
 
   /* --------------------------------------------------------------------------
-     SITE — identity and the links used in the masthead and footer.
+     SITE — identity and the links used in the header and footer.
      -------------------------------------------------------------------------- */
   site: {
     name: "Saurav Sudhar",
     role: "Software · Infrastructure Engineer",
-    // Used by the live status strip. Any IANA timezone string works.
+    // Drives the live "mission control" clock. Any IANA timezone works.
     timezone: "Europe/London",
     locationLabel: "Leeds, UK",
-    // Approximate, just for the ambient coordinate readout in the masthead.
-    coordinates: "53.8008° N, 1.5491° W",
+    // Ambient coordinate readout in the telemetry strip.
+    coordinates: "53.8008°N · 1.5491°W",
     email: "sauravsnair99@gmail.com",
     socials: {
       github: "https://github.com/sauravscode",
@@ -36,30 +39,28 @@ const DATA = {
   },
 
   /* --------------------------------------------------------------------------
-     HERO — the first thing a visitor reads. Keep the headline short and the
-     deck human. The eyebrow is rendered in mono as a small label.
+     HERO — the opening sequence. The Clarke quote is the centrepiece; keep it.
+     `statement` is the short human line under the name ({{ }} = accent).
      -------------------------------------------------------------------------- */
   hero: {
     eyebrow: "Infrastructure for healthcare research",
-    // The headline is split into lines so each one reveals on its own.
-    // Wrap any phrase in {{ }} to print it in the accent colour.
-    headline: [
-      "I build the quiet",
-      "infrastructure that",
-      "{{healthcare research}}",
-      "runs on."
-    ],
+    name: "Saurav Sudhar",
+    role: "Software · Infrastructure Engineer",
+    statement:
+      "I build the quiet infrastructure that {{healthcare research}} runs on.",
+    // The famous adage — the soul of the landing page.
+    quote: "Any sufficiently advanced technology is indistinguishable from magic.",
+    quoteAuthor: "Arthur C. Clarke",
     deck:
       "Kubernetes platforms for NHS Trusted Research Environments by day; " +
-      "landscapes, architecture, and the behaviour of light by way of a Nikon " +
-      "when I step away from the cluster. I care about how things are " +
-      "built — and that's the same instinct whether it's a platform or a photograph."
+      "landscapes, architecture, and the behaviour of light through a Nikon when " +
+      "I step away from the cluster. Same instinct either way — I care about how " +
+      "things are built."
   },
 
   /* --------------------------------------------------------------------------
-     WORK — the projects. The FIRST entry is rendered large as the centrepiece;
-     the rest follow as an indexed list. Each "manifest" is the small spec-sheet
-     of key/value metadata shown in mono.
+     WORK — the projects. The FIRST entry renders large as the "primary system";
+     the rest follow as indexed modules. `manifest` is the small mono spec sheet.
      -------------------------------------------------------------------------- */
   work: [
     {
@@ -148,7 +149,7 @@ const DATA = {
 
   /* --------------------------------------------------------------------------
      ABOUT — keep it short and human. Each string in `paragraphs` is one block.
-     `notes` are the small mono entries in the margin (your "field log").
+     `notes` are the small mono telemetry entries (your "field log").
      -------------------------------------------------------------------------- */
   about: {
     paragraphs: [
@@ -182,17 +183,15 @@ const DATA = {
      PHOTOGRAPHY — the gallery is driven by Cloudinary.
 
      1. Set `cloudName` to your Cloudinary cloud name (Dashboard → top left).
-     2. Upload your photos to Cloudinary. For each one, copy its "Public ID"
+     2. Upload your photos. For each one, copy its "Public ID"
         (e.g. "portfolio/derwent-water" — folder included).
      3. Add an entry below. The app builds optimised, responsive URLs for you
         (f_auto, q_auto, blur-up placeholder) — you never write a transform.
 
      `ratio` is width/height — it reserves space so the page never jumps while
-     images load. Get it from the photo's dimensions (e.g. 3:2 landscape = 1.5,
-     2:3 portrait = 0.667, square = 1).
+     images load. 3:2 landscape = 1.5, 2:3 portrait = 0.667, square = 1.
 
-     No Cloudinary yet? You can also drop a full image URL in `publicId` and it
-     will be used as-is, so you can wire content first and switch later.
+     No Cloudinary yet? Drop a full image URL in `publicId` and it is used as-is.
      -------------------------------------------------------------------------- */
   photography: {
     cloudName: "your-cloud-name",
@@ -234,3 +233,6 @@ const DATA = {
     ]
   }
 };
+
+// Expose globally so the (module) app can read it. Edit above — not this line.
+window.DATA = DATA;

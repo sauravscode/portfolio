@@ -1,21 +1,22 @@
 # Saurav Sudhar — Portfolio
 
-A personal portfolio with an editorial, archival aesthetic — *"Specimen / Manifest."*
-Warm paper-and-ink, a characterful serif (Fraunces) for warmth, tracked monospace
-(JetBrains Mono) for the infrastructure texture, and one restrained ember accent.
+**"EVENT HORIZON."** A portfolio rendered around a real-time, gravitationally-lensed
+**black hole** — Einstein-ring light bending, a doppler-shifted accretion disk, a
+photon ring — written as a single WebGL fragment shader, no Three.js. The site is
+a voyage: scroll is flight, sections are sectors, navigation engages the warp
+drive, and Arthur C. Clarke's adage anchors the landing:
+*"Any sufficiently advanced technology is indistinguishable from magic."*
 
 Built with **vanilla HTML, CSS, and JavaScript — no framework, no build step.**
-Open `index.html` and it runs. The whole thing is a handful of static files, which
-is the right tool for a portfolio: sub-second LCP, nothing to hydrate, full control
-over every pixel of craft.
 
 ```
 portfolio/
 ├── index.html          # semantic structure (shells that JS fills from data.js)
-├── css/styles.css      # the entire design system, one organised file
+├── css/styles.css      # the entire design system, one sectioned file
 ├── js/
 │   ├── data.js         # ← ALL your content lives here. Edit this, nothing else.
-│   └── app.js          # rendering + interactions (no need to touch this)
+│   ├── app.js          # the flight computer — rendering + every interaction
+│   └── space.js        # the black-hole universe (WebGL, hand-written GLSL)
 └── README.md
 ```
 
@@ -24,23 +25,44 @@ portfolio/
 ## ✦ The one rule
 
 **To change any content, edit [`js/data.js`](js/data.js) only.** Never touch the
-HTML, CSS, or `app.js`. The layout reads from the `DATA` object and renders itself.
-Every section is commented in that file.
+HTML, CSS, `app.js`, or `space.js`. The page reads from the `DATA` object and
+renders itself. Every section is commented in that file.
+
+---
+
+## ✦ The experience
+
+- **The black hole** — the hero is lit by an accretion disk with doppler beaming
+  (the approaching side burns brighter), a photon ring, and lensed far-side arcs.
+  The starfield genuinely bends around the shadow. As you scroll, the hole recedes
+  off the bow; it returns as a beacon at the final sector.
+- **The voyage** — each section is a sector with its own nebula palette. Scroll
+  velocity streaks the stars; clicking any nav link fires a warp burst.
+- **The ship console** — press **⌘K** (or `/`) and type: `goto work`, `email`,
+  `clarke`, `whoami`, `uptime`, `hyperdrive`, `coffee`, `help`…
+- **Telemetry** — a live HUD (sector, velocity, local time, session clock, FPS),
+  a route map on the left edge, and a mission clock in the header.
+- **Engine hum** — **SND** toggles a generative WebAudio soundscape (two detuned
+  oscillators + filtered stellar wind; warp whooshes on jumps). No audio files;
+  off by default.
+- **Signature details** — decode-scramble section titles, a constellation map of
+  the featured stack, a targeting-reticle cursor with a comet trail, motes that
+  gravitate toward the hole, occasional meteors, holographic panels with corner
+  brackets and pointer-tracked sheen, magnetic buttons, and the konami code.
 
 ---
 
 ## Running locally
 
-No build, no dependencies. Either:
+No build, no dependencies:
 
-- **Just open it** — double-click `index.html`. (Photos load from Cloudinary over
-  the network, so they need an internet connection.)
-- **Or serve it** (nicer for development):
+```bash
+python3 -m http.server 8000
+# then visit http://localhost:8000
+```
 
-  ```bash
-  python3 -m http.server 8000
-  # then visit http://localhost:8000
-  ```
+`?still=1` renders a settled, static frame with all content revealed (used for
+previews and tests; add `&y=1200` or `#work` to jump).
 
 ---
 
@@ -48,7 +70,7 @@ No build, no dependencies. Either:
 
 The gallery is driven by [Cloudinary](https://cloudinary.com)'s free tier. You never
 write an image transform by hand — the site builds optimised, responsive URLs
-(`f_auto`, `q_auto`, a blurred low-quality placeholder, and `srcset`) for you.
+(`f_auto`, `q_auto`, `srcset`, fade-in) for you.
 
 **One-time setup**
 
@@ -63,48 +85,43 @@ write an image transform by hand — the site builds optimised, responsive URLs
    }
    ```
 
+Until you set this, the gallery shows **"awaiting signal"** placeholders with your
+captions — the layout is correct before the photos exist.
+
 **Adding a photo**
 
-1. Upload the image in Cloudinary (Media Library). Put your photos in a folder, e.g.
-   `portfolio/`.
-2. Copy the photo's **Public ID** (it includes the folder, e.g. `portfolio/derwent-water`).
+1. Upload it in Cloudinary (Media Library), e.g. into a `portfolio/` folder.
+2. Copy the photo's **Public ID** (includes the folder, e.g. `portfolio/derwent-water`).
 3. Add an entry to the `photos` array:
 
    ```js
    { publicId: "portfolio/derwent-water", ratio: 1.5, caption: "Derwent Water, dawn" },
    ```
 
-   - **`ratio`** is `width ÷ height`. It reserves the right space so the page never
-     jumps while images load. Common values:
-     - Landscape 3:2 → `1.5`
-     - Portrait 2:3 → `0.667`
-     - Square → `1`
-   - **`caption`** is optional; it shows on hover and in the lightbox.
+   - **`ratio`** is `width ÷ height` (3:2 → `1.5`, 2:3 → `0.667`, square → `1`).
+   - **`caption`** shows on hover ("PLATE 01 — …") and in the lightbox.
 
-**Removing a photo** — delete its line from the `photos` array. Show up to ~10 for
-the best composition.
+**Removing a photo** — delete its line. ~10 reads best.
 
-> **No Cloudinary yet?** You can drop a full image URL straight into `publicId`
-> (anything starting with `http`) and it's used as-is — so you can wire up the
-> content first and switch to Cloudinary later.
+> **No Cloudinary yet?** Drop a full image URL straight into `publicId` (anything
+> starting with `http`) and it's used as-is — wire content first, switch later.
 
 Also set your Instagram link in the same `photography` block.
 
 ---
 
-## Updating projects, about, reading, and links
-
-All in `js/data.js`:
+## Updating everything else (`js/data.js`)
 
 | What | Where | Notes |
 |------|-------|-------|
-| Hero headline & deck | `hero` | Wrap a phrase in `{{ }}` to colour it with the accent. |
-| Projects | `work[]` | The entry with `featured: true` is rendered large as the centrepiece. `manifest` is the small spec-sheet; `stack` are the tech tags; `links` are the buttons. |
+| Name / role / socials / email | `site` | Used across the header, console, channel, footer, and the live clock. |
+| The Clarke quote | `hero.quote`, `hero.quoteAuthor` | The word **magic** shimmers automatically. |
+| Hero statement | `hero.statement` | Wrap a phrase in `{{ }}` to colour it with the accent. |
+| Projects | `work[]` | The entry with `featured: true` renders large as the "prime system" with the constellation map. `manifest` is the spec sheet; `stack` are the chips; `links` are the buttons. |
 | About copy | `about.paragraphs[]` | Each string is one paragraph. |
-| "Field log" margin notes | `about.notes[]` | `{ k: "label", v: "value" }`. |
+| "Field log" notes | `about.notes[]` | `{ k: "label", v: "value" }`. |
 | Reading shelves | `reading.current[]`, `reading.finished[]` | `note` is optional. |
-| Name / role / socials / email | `site` | Used across the masthead, connect, and footer. |
-| Live status location & timezone | `site.timezone`, `site.locationLabel` | Any IANA timezone string. |
+| Live clock / location | `site.timezone`, `site.locationLabel` | Any IANA timezone string. |
 
 ---
 
@@ -120,42 +137,42 @@ git commit -m "Portfolio"
 git push origin main
 ```
 
-Then in the repo: **Settings → Pages → Build and deployment → Source: Deploy from a
-branch → Branch: `main` / root → Save.** Your site appears at
-`https://<username>.github.io/<repo>/` within a minute or two.
+Then: **Settings → Pages → Source: Deploy from a branch → `main` / root.**
 
 ### Netlify (drag-and-drop)
 
-Go to [app.netlify.com/drop](https://app.netlify.com/drop) and drag the project
-folder in. Done. (No build command, no publish directory needed — it's all static.)
-
-### Netlify / Vercel (from Git)
-
-Connect the repo. **Build command:** none. **Publish/Output directory:** the project
-root (`.`).
+Drag the folder onto [app.netlify.com/drop](https://app.netlify.com/drop).
 
 ---
 
-## Design notes
+## Design & engineering notes
 
-- **Type** — *Fraunces* (display serif: warmth, the reader-of-books feel),
-  *Inter* (UI), *JetBrains Mono* (metadata, the infrastructure texture). Loaded with
-  `display=swap` so text paints instantly on a serif fallback while the webfont
-  arrives — that keeps LCP low.
-- **Colour** — a warm "paper" light theme by default (most dev portfolios are dark;
-  this one isn't) with a considered warm-dark counterpart. One ember accent, used
-  sparingly. Toggle in the masthead; choice is remembered, and it honours your
-  system `prefers-color-scheme` on first visit.
-- **Motion** — restrained and purposeful: clip-reveal headlines, lift-and-fade on
-  scroll, a viewfinder cursor over photographs, an ambient "control plane" status
-  strip (a quiet nod to the day job). All of it is removed automatically under
-  `prefers-reduced-motion`.
-- **Performance** — no framework or build; lazy-loaded images with Cloudinary
-  blur-up placeholders and `srcset`; aspect ratios reserved up front so there's no
-  layout shift.
-- **Accessibility** — semantic landmarks, a skip link, keyboard-operable menu and
-  lightbox (arrows / Esc), visible focus styles, and high contrast on both themes.
+- **The 3D** — `space.js` is one full-screen WebGL fragment shader: screen-space
+  gravitational lensing (radial compression toward the photon sphere plus a
+  frame-drag swirl), an accretion disk built from rigidly-rotating fbm turbulence
+  with doppler beaming, four parallax starfield layers, a deep-field galaxy layer
+  that blooms in during the photography sector, and per-sector nebula palettes.
+- **Motion** — boot sequence, warp bursts on navigation, decode-scramble titles,
+  reveal-on-scroll, panel tilt + sheen, magnetic buttons, reticle cursor, comet
+  trail, gravity-bound motes, meteors. Press **FX** to switch it all off (the
+  choice is remembered); everything also degrades automatically under
+  `prefers-reduced-motion` to a clean static frame.
+- **Audio** — fully generative (oscillators + filtered noise), created only after
+  a user gesture, default off. No audio assets.
+- **Performance** — no framework or build; capped device-pixel-ratio with adaptive
+  quality that drops render scale if frames run slow; the scene pauses when the
+  tab is hidden; lazy, responsive, `f_auto/q_auto` images with reserved aspect
+  ratios so there's no layout shift.
+- **Security** — strict Content-Security-Policy (`script-src 'self'`), no
+  third-party runtime scripts, no `innerHTML` for data (everything via
+  `textContent`/`createElement`), `rel="noopener noreferrer"` on outbound links.
+  Static hosting means there's no server to attack.
+- **Accessibility** — semantic landmarks, a skip link, keyboard-operable menu,
+  console, and lightbox (arrows / Esc), visible focus styles, `aria-label` on the
+  animated name, and a `<noscript>` fallback.
+- **Type** — *Space Grotesk* (display + UI), *JetBrains Mono* (telemetry),
+  *Fraunces* italic reserved for the Clarke quote.
 
 ---
 
-*Built with vanilla HTML · CSS · JS.*
+*Rendered around a black hole — WebGL · vanilla JS · zero frameworks.*

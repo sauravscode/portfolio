@@ -1,160 +1,261 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="void">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <title>Saurav Sudhar — Software · Infrastructure Engineer</title>
-  <meta name="description" content="Saurav Sudhar builds Kubernetes infrastructure for NHS Trusted Research Environments, and photographs the structure of light. Portfolio, selected work, and reading." />
+  <meta name="description" content="Saurav Sudhar builds Kubernetes infrastructure for NHS Trusted Research Environments — and photographs the structure of light. A portfolio rendered around a gravitationally-lensed black hole." />
   <meta name="author" content="Saurav Sudhar" />
-  <meta name="theme-color" content="#f5f2ec" />
+  <meta name="theme-color" content="#04050d" />
+  <meta name="color-scheme" content="dark" />
+
+  <!-- Security: lock scripts to same-origin; allow only the resources we use. -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self';
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src https://fonts.gstatic.com;
+    img-src 'self' data: https://res.cloudinary.com;
+    connect-src 'self';
+    base-uri 'self';
+    form-action 'none';
+    object-src 'none';
+  " />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Saurav Sudhar — Software · Infrastructure Engineer" />
-  <meta property="og:description" content="Kubernetes infrastructure for NHS research, and the structure of light." />
+  <meta property="og:description" content="Kubernetes infrastructure for NHS research, and the structure of light — rendered around a black hole." />
 
-  <!-- Fonts: preconnect early, swap so text paints instantly on the fallback.
-       Fraunces (display serif) is the LCP face; Inter (UI) and JetBrains Mono
-       (metadata) load alongside it. -->
+  <!-- Fonts: Space Grotesk (display + UI), JetBrains Mono (telemetry),
+       Fraunces italic (reserved for the Clarke quote). Swap = instant paint. -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,300;1,9..144,400&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" />
 
+  <link rel="preload" as="style" href="css/styles.css" />
   <link rel="stylesheet" href="css/styles.css" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' font-family='Georgia,serif'>S</text></svg>" />
 
-  <!-- data.js is small and same-origin; load it in the head so content is
-       ready the moment the DOM is parsed. -->
+  <!-- Favicon: a tiny black hole — amber photon ring around the shadow. -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><radialGradient id='g' cx='50%25' cy='50%25' r='50%25'><stop offset='52%25' stop-color='%2304050d'/><stop offset='62%25' stop-color='%23ffb45e'/><stop offset='72%25' stop-color='%23ff7a3c'/><stop offset='100%25' stop-color='%2304050d'/></radialGradient></defs><rect width='100' height='100' fill='%2304050d'/><ellipse cx='50' cy='50' rx='46' ry='12' fill='none' stroke='%23ffb45e' stroke-width='4' opacity='.85'/><circle cx='50' cy='50' r='26' fill='url(%23g)'/><circle cx='50' cy='50' r='15' fill='%23000'/></svg>" />
+
+  <!-- Critical, above-the-fold paint so the void shows instantly. -->
+  <style>
+    html{background:#04050d;color-scheme:dark}
+    body{margin:0;background:transparent;color:#e8ecfa;
+      font-family:"Space Grotesk",system-ui,-apple-system,sans-serif}
+    .js-loading main{opacity:0}
+  </style>
+
+  <!-- Content lives in data.js (global window.DATA). Loaded first, no defer,
+       so it's ready before the modules render the page. -->
   <script src="js/data.js"></script>
 </head>
 
-<body>
-  <!-- Grain + custom cursor live above everything but ignore pointer events -->
+<body class="js-loading">
+  <noscript>
+    <div class="noscript">
+      This portfolio renders a black hole in WebGL. Enable JavaScript for the
+      full experience — or reach me at sauravsnair99@gmail.com.
+    </div>
+  </noscript>
+
+  <!-- ===== Ambient layers (decorative, never capture pointer) ===== -->
+  <canvas class="stage" id="stage" aria-hidden="true"></canvas>     <!-- WebGL universe -->
+  <div class="veil" id="veil" aria-hidden="true"></div>             <!-- darkens behind scrolled content -->
+  <canvas class="fx" id="fx" aria-hidden="true"></canvas>           <!-- 2D particles + cursor trail -->
+  <div class="scanlines" aria-hidden="true"></div>
   <div class="grain" aria-hidden="true"></div>
-  <div class="cursor" id="cursor" aria-hidden="true"><span class="cursor__label"></span></div>
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="cursor" id="cursor" aria-hidden="true">
+    <span class="cursor__ring"></span>
+    <span class="cursor__dot"></span>
+    <span class="cursor__label mono"></span>
+  </div>
+
+  <!-- ===== Boot sequence (fades away; content lives underneath) ===== -->
+  <div class="boot" id="boot" aria-hidden="true">
+    <div class="boot__inner mono">
+      <span class="boot__line" data-d="0">› uplink established</span>
+      <span class="boot__line" data-d="1">› calibrating event horizon</span>
+      <span class="boot__line" data-d="2">› spooling warp drive</span>
+      <span class="boot__line boot__line--ok" data-d="3">› all systems nominal — entering the void</span>
+    </div>
+    <div class="boot__bar"><span class="boot__fill"></span></div>
+    <span class="boot__skip mono">click to skip</span>
+  </div>
+
+  <!-- ===== Ship console (⌘K / "/") ===== -->
+  <div class="console" id="console" role="dialog" aria-modal="true" aria-label="Ship console" hidden>
+    <div class="console__panel">
+      <div class="console__head mono">
+        <span class="console__sigil" aria-hidden="true">◉</span>
+        SHIP CONSOLE
+        <span class="console__hint">esc to close</span>
+      </div>
+      <input class="console__input mono" id="console-input" type="text"
+             placeholder="type a command — try: goto work · email · help"
+             autocomplete="off" autocapitalize="off" spellcheck="false"
+             aria-label="Command input" />
+      <ul class="console__list" id="console-list" role="listbox"></ul>
+      <div class="console__out mono" id="console-out" aria-live="polite"></div>
+    </div>
+  </div>
 
   <a class="skip-link" href="#work">Skip to work</a>
 
-  <!-- The "spine": ambient section index + scroll progress (decorative) -->
-  <aside class="spine" aria-hidden="true">
-    <span class="spine__num" id="spine-num">00</span>
-    <span class="spine__rule"><span class="spine__fill" id="spine-fill"></span></span>
-    <span class="spine__label" id="spine-label">Index</span>
+  <!-- ===== Route map: the voyage, left edge (JS builds waypoints) ===== -->
+  <nav class="route" id="route" aria-label="Sections"></nav>
+
+  <!-- ===== Telemetry HUD, bottom left ===== -->
+  <aside class="hud mono" id="hud" aria-hidden="true">
+    <div class="hud__row"><span class="hud__k">SECTOR</span><b id="hud-sector">00 · ARRIVAL</b></div>
+    <div class="hud__row"><span class="hud__k">VEL</span><b id="hud-vel">0.000c</b></div>
+    <div class="hud__row"><span class="hud__k">LOC</span><b id="hud-loc">—</b></div>
+    <div class="hud__row"><span class="hud__k">T+</span><b id="hud-uptime">00:00</b></div>
+    <div class="hud__row"><span class="hud__k">FPS</span><b id="hud-fps">—</b></div>
   </aside>
 
-  <!-- ===================== MASTHEAD ===================== -->
-  <header class="masthead" id="masthead">
-    <a class="masthead__brand" href="#top" aria-label="Saurav Sudhar — home">
-      <span class="masthead__name" id="brand-name">Saurav Sudhar</span>
-      <span class="masthead__role mono" id="brand-role">Software · Infrastructure Engineer</span>
+  <!-- ===== Header / flight deck ===== -->
+  <header class="deck" id="deck">
+    <a class="deck__brand" href="#top" aria-label="Saurav Sudhar — home">
+      <span class="deck__mark" aria-hidden="true"></span>
+      <span class="deck__name" id="brand-name">Saurav Sudhar</span>
+      <span class="deck__role mono" id="brand-role">Software · Infrastructure Engineer</span>
     </a>
 
     <nav class="nav" id="primary-nav" aria-label="Primary">
-      <a href="#work" data-nav>Work</a>
-      <a href="#about" data-nav>About</a>
-      <a href="#photography" data-nav>Photography</a>
-      <a href="#reading" data-nav>Reading</a>
-      <a href="#connect" data-nav>Connect</a>
+      <a href="#work" data-nav><span class="nav__idx mono">01</span>Work</a>
+      <a href="#about" data-nav><span class="nav__idx mono">02</span>Operator</a>
+      <a href="#photography" data-nav><span class="nav__idx mono">03</span>Deep&nbsp;Field</a>
+      <a href="#reading" data-nav><span class="nav__idx mono">04</span>Archive</a>
+      <a href="#connect" data-nav><span class="nav__idx mono">05</span>Channel</a>
     </nav>
 
-    <div class="masthead__aside">
-      <span class="status mono" id="status" title="Live local time">
-        <span class="status__dot" aria-hidden="true"></span>
-        <span id="status-text">reconciling…</span>
+    <div class="deck__aside">
+      <span class="telemetry mono" id="telemetry" title="Live local time">
+        <span class="telemetry__dot" aria-hidden="true"></span>
+        <span id="telemetry-text">reconciling…</span>
       </span>
-      <button class="theme-toggle" id="theme-toggle" type="button"
-              aria-label="Toggle colour theme">
-        <span class="theme-toggle__track"><span class="theme-toggle__knob"></span></span>
+      <button class="hud-btn mono" id="console-toggle" type="button" title="Open the ship console (⌘K)">
+        ⌘K
+      </button>
+      <button class="hud-btn mono" id="audio-toggle" type="button"
+              aria-pressed="false" title="Toggle engine hum (generative audio)">
+        SND
+      </button>
+      <button class="hud-btn mono" id="motion-toggle" type="button"
+              aria-pressed="false" title="Toggle motion &amp; effects">
+        FX
       </button>
       <button class="menu-toggle" id="menu-toggle" type="button"
               aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
-        <span></span><span></span>
+        <span></span><span></span><span></span>
       </button>
     </div>
   </header>
 
   <main id="top">
 
-    <!-- ===================== §00 — HERO ===================== -->
-    <section class="hero section" id="hero" data-index="00" data-label="Index">
+    <!-- ===================== §00 — ARRIVAL ===================== -->
+    <section class="hero section" id="hero" data-index="00" data-label="Arrival">
       <div class="hero__inner">
-        <p class="hero__eyebrow mono reveal" id="hero-eyebrow"></p>
-        <h1 class="hero__headline" id="hero-headline"></h1>
-        <p class="hero__deck reveal" id="hero-deck"></p>
-        <div class="hero__meta mono reveal" id="hero-meta"></div>
+        <p class="hero__eyebrow mono" id="hero-eyebrow"></p>
+        <h1 class="hero__name" id="hero-name" aria-label="Saurav Sudhar"></h1>
+        <p class="hero__statement" id="hero-statement"></p>
+
+        <figure class="quote" id="hero-quote">
+          <span class="quote__rule" aria-hidden="true"></span>
+          <blockquote class="quote__text" id="quote-text"></blockquote>
+          <figcaption class="quote__author mono" id="quote-author"></figcaption>
+          <span class="quote__rule" aria-hidden="true"></span>
+        </figure>
+
+        <p class="hero__deck" id="hero-deck"></p>
       </div>
+
       <a class="hero__scroll mono" href="#work" aria-label="Scroll to work">
-        <span>Scroll</span>
+        <span>BEGIN DESCENT</span>
         <span class="hero__scroll-line" aria-hidden="true"></span>
       </a>
     </section>
 
-    <!-- ===================== §01 — WORK ===================== -->
-    <section class="section work" id="work" data-index="01" data-label="Work">
+    <!-- ===================== §01 — THE FORGE ===================== -->
+    <section class="section work" id="work" data-index="01" data-label="Forge">
       <div class="section__head">
-        <span class="section__num mono">§01</span>
-        <h2 class="section__title reveal">Selected Work</h2>
-        <p class="section__sub mono reveal">Infrastructure, tools, and research systems</p>
+        <span class="section__watermark mono" aria-hidden="true">01</span>
+        <span class="section__num mono">SECTOR 01 / THE FORGE</span>
+        <h2 class="section__title" data-scramble>Selected Systems</h2>
+        <p class="section__sub mono" data-reveal>Infrastructure, tools, and research platforms in service</p>
       </div>
       <div id="work-featured"></div>
       <ol class="work__list" id="work-list"></ol>
     </section>
 
-    <!-- ===================== §02 — ABOUT ===================== -->
-    <section class="section about" id="about" data-index="02" data-label="About">
+    <!-- ===================== §02 — THE OPERATOR ===================== -->
+    <section class="section about" id="about" data-index="02" data-label="Operator">
       <div class="section__head">
-        <span class="section__num mono">§02</span>
-        <h2 class="section__title reveal">Profile</h2>
-        <p class="section__sub mono reveal">Who is keeping the lights on</p>
+        <span class="section__watermark mono" aria-hidden="true">02</span>
+        <span class="section__num mono">SECTOR 02 / THE OPERATOR</span>
+        <h2 class="section__title" data-scramble>Who Keeps the Lights On</h2>
+        <p class="section__sub mono" data-reveal>Profile · field log · telemetry</p>
       </div>
       <div class="about__grid">
         <div class="about__body" id="about-body"></div>
-        <aside class="about__notes" aria-label="Field notes">
-          <span class="about__notes-head mono">Field log</span>
+        <aside class="about__notes panel" aria-label="Field log">
+          <span class="about__notes-head mono">FIELD LOG</span>
           <dl id="about-notes"></dl>
         </aside>
       </div>
     </section>
 
-    <!-- ===================== §03 — PHOTOGRAPHY ===================== -->
-    <section class="section photo" id="photography" data-index="03" data-label="Photography">
+    <!-- ===================== §03 — DEEP FIELD ===================== -->
+    <section class="section photo" id="photography" data-index="03" data-label="Deep Field">
       <div class="section__head">
-        <span class="section__num mono">§03</span>
-        <h2 class="section__title reveal">Photography</h2>
-        <p class="section__sub mono reveal" id="photo-sub">Landscape · architecture · travel</p>
+        <span class="section__watermark mono" aria-hidden="true">03</span>
+        <span class="section__num mono">SECTOR 03 / DEEP FIELD</span>
+        <h2 class="section__title" data-scramble>Photography</h2>
+        <p class="section__sub mono" id="photo-sub" data-reveal>Landscape · architecture · the behaviour of light</p>
       </div>
       <div class="gallery" id="gallery"></div>
-      <a class="photo__more mono" id="photo-instagram" href="#" target="_blank" rel="noopener">
-        More on Instagram <span aria-hidden="true">→</span>
+      <a class="photo__more mono" id="photo-instagram" href="#" target="_blank" rel="noopener noreferrer">
+        Full transmission on Instagram <span aria-hidden="true">→</span>
       </a>
     </section>
 
-    <!-- ===================== §04 — READING ===================== -->
-    <section class="section reading" id="reading" data-index="04" data-label="Reading">
+    <!-- ===================== §04 — THE ARCHIVE ===================== -->
+    <section class="section reading" id="reading" data-index="04" data-label="Archive">
       <div class="section__head">
-        <span class="section__num mono">§04</span>
-        <h2 class="section__title reveal">Reading</h2>
-        <p class="section__sub mono reveal">A shelf, not a table</p>
+        <span class="section__watermark mono" aria-hidden="true">04</span>
+        <span class="section__num mono">SECTOR 04 / THE ARCHIVE</span>
+        <h2 class="section__title" data-scramble>Reading</h2>
+        <p class="section__sub mono" data-reveal>A shelf, not a table</p>
       </div>
       <div class="reading__grid">
         <div class="reading__col">
-          <span class="reading__shelf-label mono">Currently reading</span>
+          <span class="reading__shelf-label mono">▸ CURRENTLY READING</span>
           <ul class="shelf" id="shelf-current"></ul>
         </div>
         <div class="reading__col">
-          <span class="reading__shelf-label mono">Finished</span>
+          <span class="reading__shelf-label mono">▸ FINISHED</span>
           <ul class="shelf" id="shelf-finished"></ul>
         </div>
       </div>
     </section>
 
-    <!-- ===================== §05 — CONNECT ===================== -->
-    <section class="section connect" id="connect" data-index="05" data-label="Connect">
+    <!-- ===================== §05 — OPEN CHANNEL ===================== -->
+    <section class="section connect" id="connect" data-index="05" data-label="Channel">
       <div class="connect__inner">
-        <span class="section__num mono">§05</span>
-        <h2 class="connect__title" id="connect-title">Let's build something that stays up.</h2>
+        <span class="section__num mono">SECTOR 05 / OPEN CHANNEL</span>
+        <h2 class="connect__title" id="connect-title" data-scramble>Let's build something that stays up.</h2>
+        <a class="connect__mail" id="connect-mail" href="#">
+          <span id="connect-mail-text"></span>
+          <span class="connect__mail-line" aria-hidden="true"></span>
+        </a>
         <div class="connect__links" id="connect-links"></div>
+        <p class="connect__hint mono">or press <kbd>⌘K</kbd> and type <b>email</b></p>
       </div>
     </section>
   </main>
@@ -164,7 +265,7 @@
     <div class="colophon__row mono">
       <span id="colophon-name"></span>
       <span id="colophon-coords"></span>
-      <span>Vanilla HTML · CSS · JS — no framework</span>
+      <span>Rendered around a black hole — WebGL · vanilla JS · zero frameworks</span>
       <span id="colophon-year"></span>
     </div>
   </footer>
@@ -172,7 +273,7 @@
   <!-- ===================== LIGHTBOX ===================== -->
   <div class="lightbox" id="lightbox" role="dialog" aria-modal="true"
        aria-label="Photograph viewer" hidden>
-    <button class="lightbox__close" id="lb-close" aria-label="Close">Close ✕</button>
+    <button class="lightbox__close" id="lb-close" aria-label="Close viewer">✕</button>
     <button class="lightbox__nav lightbox__nav--prev" id="lb-prev" aria-label="Previous">‹</button>
     <figure class="lightbox__figure">
       <img id="lb-img" alt="" />
@@ -181,6 +282,9 @@
     <button class="lightbox__nav lightbox__nav--next" id="lb-next" aria-label="Next">›</button>
   </div>
 
-  <script src="js/app.js" defer></script>
+  <!-- ===================== TOAST (easter eggs, console feedback) ===== -->
+  <div class="toast mono" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>
