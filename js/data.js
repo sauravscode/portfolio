@@ -6,15 +6,25 @@
    from this object and render themselves.
 
    Quick reference:
-     • site         → name, role, location, email, social links
-     • hero         → statement, deck, and the Clarke quote (now the footer epigraph)
-     • work         → projects (first entry = the featured "primary system")
-     • about        → operator profile paragraphs + telemetry "field log"
+     • site         → name, role, location, email, social links + status fields
+     • hero         → statement, deck, and the Clarke quote (footer epigraph)
+     • work         → services/projects (first entry = the featured "primary system")
+     • changelog    → dated history feed: role / ship / event / move
+     • about        → operator profile paragraphs + runbook notes
      • photography  → Cloudinary cloud name + the photo list + Instagram
-     • reading      → currently-reading and finished shelves
+     • reading      → currently-reading (installing) and finished (resolved)
+
+   Status-page additions (owner-maintained — never computed):
+     • site.status        { level: "operational" | "active" | "away", label }
+     • site.availability  { hours: [open, close], days: [ISO 1–7] } in site.timezone
+     • site.updated       "YYYY-MM" — the footer's "last updated"
+     • work[].status      "operational" | "active" | "complete"
+     • work[].start       "YYYY-MM" first active month (activity bar)
+     • work[].end         "YYYY-MM" last active month, or null when ongoing
+     • work[].changes     optional [{ date: "YYYY-MM", text }]
 
    A note on accents: anywhere you see {{ }}, the wrapped phrase is printed in
-   the holographic accent colour. Use it sparingly.
+   the italic accent style. Use it sparingly.
    ========================================================================== */
 
 const DATA = {
@@ -31,6 +41,20 @@ const DATA = {
     // Ambient coordinate readout in the telemetry strip.
     coordinates: "53.8008°N · 1.5491°W",
     email: "sauravsnair99@gmail.com",
+
+    // Owner-written banner. level: "operational" | "active" | "away".
+    // This is a statement, not a computed health check.
+    status: {
+      level: "active",
+      label: "Building karectl at LTH · open to conversations"
+    },
+
+    // On-call window in the timezone above. days: ISO weekday (1 = Monday).
+    availability: { hours: [9, 18], days: [1, 2, 3, 4, 5] },
+
+    // Owner-maintained "last updated". Shown in the footer; never computed.
+    updated: "2026-11",
+
     socials: {
       github: "https://github.com/sauravscode",
       linkedin: "https://www.linkedin.com/in/saurav-sudhar/",
@@ -68,6 +92,9 @@ const DATA = {
       tagline: "Production Kubernetes for NHS Trusted Research Environments",
       year: "2024 — present",
       featured: true,
+      status: "operational",
+      start: "2024-01", // TODO(owner): confirm start month
+      end: null, // ongoing
       description:
         "The centre of what I do. A multi-trust, GitOps-driven platform that gives " +
         "NHS research teams a secure place to work with sensitive data — without that " +
@@ -92,6 +119,9 @@ const DATA = {
       name: "FastOMOP",
       tagline: "Natural-language querying over OMOP clinical databases",
       year: "2025",
+      status: "active",
+      start: "2025-01", // TODO(owner): confirm start month
+      end: null, // ongoing
       description:
         "Ask a clinical question in plain English; get a grounded query over a " +
         "standardised OMOP data model in return. Built to shorten the distance " +
@@ -111,6 +141,9 @@ const DATA = {
       name: "FastRTT",
       tagline: "Multi-agent validation for NHS referral-to-treatment pathways",
       year: "2025",
+      status: "active",
+      start: "2025-01", // TODO(owner): confirm start month
+      end: null, // ongoing
       description:
         "A multi-agent system that walks the long, rule-heavy journey from referral " +
         "to treatment and checks it for the errors that quietly delay patients. The " +
@@ -130,6 +163,9 @@ const DATA = {
       name: "KubeCon Schedule Scraper",
       tagline: "Playwright tooling for KubeCon 2026 sessions and slide decks",
       year: "2026",
+      status: "complete",
+      start: "2026-03", // TODO(owner): confirm start month
+      end: "2026-04", // TODO(owner): confirm end month
       description:
         "A scraper that pulled the full session schedule and slide decks from " +
         "KubeCon 2026 — because the conference site made the thing I wanted hard to " +
@@ -144,6 +180,19 @@ const DATA = {
         { label: "Repository", href: "https://github.com/sauravscode" }
       ]
     }
+  ],
+
+  /* --------------------------------------------------------------------------
+     CHANGELOG — reverse-chronological history feed.
+     kind: "role" | "ship" | "event" | "move".
+     Seeded only with facts already stated elsewhere in this file. Dates the
+     source text does not pin down carry a TODO(owner) note.
+     -------------------------------------------------------------------------- */
+  changelog: [
+    { date: "2026-03", kind: "event", text: "Attended KubeCon 2026." }, // TODO(owner): confirm date
+    { date: "2026-01", kind: "move", text: "Relocated from Cardiff to Leeds." }, // TODO(owner): confirm date (source says "early 2026")
+    { date: "2025-01", kind: "event", text: "Attended the HDR UK Conference." }, // TODO(owner): confirm date
+    { date: "2024-01", kind: "role", text: "Joined Lancashire Teaching Hospitals NHS FT as a Junior Software / Infrastructure Engineer." } // TODO(owner): confirm date
   ],
 
   /* --------------------------------------------------------------------------

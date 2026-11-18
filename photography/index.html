@@ -4,70 +4,52 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-  <title>Photography — Saurav Sudhar</title>
-  <meta name="description" content="Deep Field — landscape, architecture, and the behaviour of light. Photography by Saurav Sudhar." />
-  <meta name="author" content="Saurav Sudhar" />
-  <meta name="theme-color" content="#0B0A08" />
-  <meta name="color-scheme" content="dark" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://res.cloudinary.com; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'" />
 
-  <meta http-equiv="Content-Security-Policy" content="
-    default-src 'self';
-    script-src 'self';
-    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-    font-src https://fonts.gstatic.com;
-    img-src 'self' data: https://res.cloudinary.com;
-    connect-src 'self';
-    base-uri 'self';
-    form-action 'none';
-    object-src 'none';
-  " />
+  <title>Exposures — Saurav Sudhar</title>
+  <meta name="description" content="Exposures: landscape, architecture and the behaviour of light, photographed by Saurav Sudhar." />
+  <meta name="author" content="Saurav Sudhar" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#F4F3EF" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0F1113" media="(prefers-color-scheme: dark)" />
 
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Photography — Saurav Sudhar" />
-  <meta property="og:description" content="Deep Field — landscape, architecture, and the behaviour of light." />
+  <meta property="og:title" content="Exposures — Saurav Sudhar" />
+  <meta property="og:description" content="Landscape, architecture and the behaviour of light." />
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Ccircle%20cx='16'%20cy='16'%20r='9'%20fill='%231E8E4E'/%3E%3C/svg%3E" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,300..400&family=IBM+Plex+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&amp;family=Instrument+Serif:ital@0;1&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" />
   <link rel="stylesheet" href="../css/styles.css" />
 
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230B0A08'/><circle cx='50' cy='50' r='30' fill='none' stroke='%23E09236' stroke-width='7'/><circle cx='50' cy='50' r='9' fill='%23E09236'/></svg>" />
-
-  <style>html{background:#0B0A08;color-scheme:dark}</style>
+  <script src="../js/theme.js"></script>
   <script src="../js/data.js"></script>
+  <script type="module" src="../js/app.js"></script>
 </head>
 
 <body data-page="photography">
   <noscript>
-    <p class="noscript">This site renders its content with JavaScript.
-    Reach me at sauravsnair99@gmail.com.</p>
+    <p class="noscript">This site renders its content with JavaScript. Reach me at
+      <a href="mailto:sauravsnair99@gmail.com">sauravsnair99@gmail.com</a> or
+      <a href="https://github.com/sauravscode" rel="noopener noreferrer">github.com/sauravscode</a>.</p>
   </noscript>
 
-  <div class="glow" id="glow" aria-hidden="true"></div>
-  <div class="grain" aria-hidden="true"></div>
-
-  <a class="skip-link" href="#plates">Skip to content</a>
+  <a class="skip-link" href="#main">Skip to content</a>
 
   <header class="site-head" id="site-head"></header>
 
-  <main>
-    <section class="section page-head" aria-labelledby="photo-title">
-      <div class="wrap wrap--narrow">
-        <p class="section-label mono-label reveal">DEEP FIELD</p>
-        <h1 class="section-title serif reveal" id="photo-title" style="--d:80ms">Photography</h1>
-        <p class="page-sub mono-label reveal" id="photo-sub" style="--d:160ms"></p>
+  <main id="main" tabindex="-1">
+    <section class="section page-head" aria-labelledby="page-title">
+      <div class="wrap">
+        <h1 class="page-title serif" id="page-title">Exposures</h1>
+        <p class="page-sub mono" id="photo-sub"></p>
       </div>
     </section>
 
-    <section class="plates-wrap" aria-label="Photographs">
-      <div class="wrap wrap--narrow">
-        <div class="plates" id="plates"></div>
-        <p class="plates-foot reveal">
-          <a class="link-line" id="photo-instagram" href="#" target="_blank" rel="noopener noreferrer">Full stream on Instagram</a>
-        </p>
-      </div>
-    </section>
+    <section class="section" id="plates" aria-label="Photographs"></section>
   </main>
 
   <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photograph viewer" hidden>
@@ -75,13 +57,11 @@
     <button class="lb-nav lb-prev" id="lb-prev" type="button" aria-label="Previous photograph">‹</button>
     <figure class="lb-figure">
       <img id="lb-img" alt="" />
-      <figcaption class="lb-cap mono-label" id="lb-cap"></figcaption>
+      <figcaption class="lb-cap mono" id="lb-cap"></figcaption>
     </figure>
     <button class="lb-nav lb-next" id="lb-next" type="button" aria-label="Next photograph">›</button>
   </div>
 
   <footer class="site-foot" id="site-foot"></footer>
-
-  <script type="module" src="../js/app.js"></script>
 </body>
 </html>
