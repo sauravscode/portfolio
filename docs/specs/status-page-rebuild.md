@@ -1,6 +1,6 @@
 # Spec — "UPTIME": status-page portfolio rebuild
 
-Status: **APPROVED 2026-11-18 — in progress**
+Status: **COMPLETE 2026-11-18 — awaiting owner review and push**
 Branch: `version2` (starting HEAD `1b56d57`)
 Owner edits to preserve (not part of this task, never stage, never modify):
 `.claude/settings.json`, `README.md` (except the section named in M5), `.claude/skills/`,
@@ -304,3 +304,10 @@ _(filled in by the reviewer as milestones are accepted)_
   clean in both themes on all pages. Filter-bar spacing fixed (single owner of the gap). `section[id]` scroll-margin-top 80px clears the 57px sticky header.
   Reduced motion: 0 animations, 0 transitions, all `.reveal` fully visible, scroll-behavior auto (all 3 pages). No overflow at 360/390/768/1280 on any page.
   README rewritten for UPTIME; the owner's "Claude and DeepSeek workflow" section is kept as an unstaged owner edit (excluded from the commit).
+
+### Final verification 2026-11-18
+- `python3 scripts/smoke-portfolio.py`: PASS /, PASS /photography/, PASS /books/.
+- 0 console errors and 0 CSP violations on 3 pages × light/dark × 390/1280. AC2/AC3 greps clean.
+- Remaining / owner actions: confirm the `TODO(owner)` dates in js/data.js; do the Instagram token setup and run the first sync, then commit
+  photography/img/ and js/photos.js; real-device check with web fonts loaded (headless runs blocked Google Fonts). Cosmetic: at 390px the
+  hero role line wraps with a leading "·" on the second line.
