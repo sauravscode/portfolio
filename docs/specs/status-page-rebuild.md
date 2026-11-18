@@ -298,3 +298,9 @@ _(filled in by the reviewer as milestones are accepted)_
   Empty current → "Nothing installing."; both empty → no filter bar plus both empty lines; no "undefined". 360px: no overflow.
   Smoke: PASS /, /photography/, /books/.
 - Polish noted for M5: spacing between the filter bar and the first group head.
+
+### M5 — ACCEPTED 2026-11-18
+- Light signal tokens corrected to #1A7A43 (4.84:1 on paper) and #8F5500 (5.45:1); the computed-text contrast sweep over every visible text node is
+  clean in both themes on all pages. Filter-bar spacing fixed (single owner of the gap). `section[id]` scroll-margin-top 80px clears the 57px sticky header.
+  Reduced motion: 0 animations, 0 transitions, all `.reveal` fully visible, scroll-behavior auto (all 3 pages). No overflow at 360/390/768/1280 on any page.
+  README rewritten for UPTIME; the owner's "Claude and DeepSeek workflow" section is kept as an unstaged owner edit (excluded from the commit).
