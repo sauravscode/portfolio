@@ -58,7 +58,7 @@ const DATA = {
     socials: {
       github: "https://github.com/sauravscode",
       linkedin: "https://www.linkedin.com/in/saurav-sudhar/",
-      instagram: "https://www.instagram.com/"
+      instagram: "https://www.instagram.com/picsxarchive/"
     }
   },
 
@@ -246,7 +246,7 @@ const DATA = {
      -------------------------------------------------------------------------- */
   photography: {
     cloudName: "your-cloud-name",
-    instagram: "https://www.instagram.com/",
+    instagram: "https://www.instagram.com/picsxarchive/",
     gear: "Nikon Z50 II",
     photos: [
       { publicId: "portfolio/photo-01", ratio: 1.5,  caption: "Northern fells, first light",

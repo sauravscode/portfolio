@@ -272,3 +272,12 @@ _(filled in by the reviewer as milestones are accepted)_
   `smoke-portfolio.py`: PASS / (other routes pending M3/M4).
 - Fix round 1: 24px targets (footer/contact/service links), live region empty on load, sections named via aria-labelledby.
 - Scope note: M3 also takes the page side of M3b (window.PHOTOS source, js/photos.js include, picsxarchive links). M3b keeps the sync script.
+
+### M3 — ACCEPTED 2026-11-18 (includes the page side of M3b: AC31, AC32)
+- Evidence: the default state (cloudName unset) renders 10 plates, 10 `class="plate-cap"`, 0 `<img>` (no requests), 10 PENDING UPLOAD, ratios reserved, and
+  "10 frames · Nikon Z50 II". The Instagram link goes to picsxarchive and is hidden for a bare `https://instagram.com`. No overflow at 360.
+  `window.PHOTOS` fixture (3 real JPEGs + remote, traversal, javascript: and missing items): remote/traversal dropped, javascript: and non-instagram
+  permalinks dropped, the missing file degrades to a disabled pending plate. Lightbox: opens on the clicked photo ("Tower 2 / 3"), focus goes to close,
+  html.is-locked set, arrows wrap among the 3 real photos, Tab cycles prev/next/close, Esc closes and restores focus to the opener and unlocks scroll.
+  Home and photography both load js/photos.js (placeholder `window.PHOTOS = []`) with a clean console. Smoke: PASS /, PASS /photography/.
+- Fix round 1: index.html now loads js/photos.js so the home Exposures count follows synced photos.

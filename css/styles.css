@@ -1352,12 +1352,307 @@ body[data-page="home"] .section + .section {
 }
 
 /* ============================================================================
-   EXPOSURES — filled by M3
+   EXPOSURES
    ========================================================================== */
 
+/* The only page that uses a plain description line under its title. */
+.page-desc {
+  max-width: 52ch;
+  margin-top: 0.55rem;
+  color: var(--muted);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+/* Grid: 1 column, then 2, then 3. Ratios are reserved by the frame, so the
+   page does not shift while images load. */
+.plates {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(1.35rem, 3.5vw, 2rem) clamp(1rem, 2.5vw, 1.5rem);
+  align-items: start;
+}
+
+@media (min-width: 600px) {
+  .plates {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 960px) {
+  .plates {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.plate {
+  min-width: 0;
+}
+
+.plate-fig {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.plate-open {
+  display: block;
+  width: 100%;
+  border-radius: 0;
+  cursor: zoom-in;
+  text-align: left;
+}
+
+.plate-open:disabled {
+  cursor: default;
+}
+
+/* Frame --------------------------------------------------------------------- */
+
+.plate-frame {
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  background-color: var(--surface);
+  background-position: center;
+  background-size: cover;
+  transition: border-color 0.15s var(--ease);
+}
+
+.plate-open:hover .plate-frame {
+  border-color: var(--muted);
+}
+
+/* object-fit: cover only inside the grid; the lightbox shows the whole frame. */
+.plate-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.3s var(--ease);
+}
+
+.plate-frame.is-blur .plate-img {
+  opacity: 0;
+}
+
+.plate-frame.is-blur.is-loaded .plate-img {
+  opacity: 1;
+}
+
+/* Pending plate: dashed hairline, mono label, deliberately no <img>. */
+.plate-frame.plate-pending {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  border-style: dashed;
+  background-color: transparent;
+  color: var(--muted);
+  text-align: center;
+  transition: none;
+}
+
+.plate-pending-label {
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* Caption as a reading ------------------------------------------------------ */
+
+.plate-caption {
+  display: grid;
+  gap: 0.2rem;
+  padding-top: 0.6rem;
+}
+
+.plate-cap {
+  color: var(--ink);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+.plate-meta {
+  display: block;
+  color: var(--muted);
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.plate-num {
+  color: var(--ink);
+}
+
+.plate-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  color: var(--muted);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+.plate-link:hover {
+  color: var(--ink);
+}
+
+/* Full stream --------------------------------------------------------------- */
+
+.plates-more {
+  margin-top: clamp(1.5rem, 4vw, 2.25rem);
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--hairline);
+}
+
+.plates-more-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--muted);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.plates-more-link:hover {
+  color: var(--ink);
+}
+
 /* ============================================================================
-   LIGHTBOX — filled by M3
+   LIGHTBOX
    ========================================================================== */
+
+html.is-locked {
+  overflow: hidden;
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  grid-template-rows: auto minmax(0, 1fr);
+  align-items: center;
+  justify-items: center;
+  gap: 0.5rem clamp(0.35rem, 1.5vw, 1rem);
+  padding: clamp(0.75rem, 2.5vw, 1.5rem);
+  background: rgba(10, 11, 12, 0.94);
+  color: #E8E6E1;
+}
+
+.lightbox.is-single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.lb-close {
+  grid-row: 1;
+  grid-column: 3;
+  justify-self: end;
+}
+
+.lightbox.is-single .lb-close {
+  grid-column: 1;
+}
+
+.lb-nav {
+  grid-row: 2;
+  align-self: center;
+}
+
+.lb-prev {
+  grid-column: 1;
+}
+
+.lb-next {
+  grid-column: 3;
+}
+
+.lb-close,
+.lb-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(232, 230, 225, 0.35);
+  border-radius: 2px;
+  background: rgba(10, 11, 12, 0.6);
+  color: #E8E6E1;
+  font-family: var(--font-mono);
+  line-height: 1;
+  transition: border-color 0.15s var(--ease), background-color 0.15s var(--ease);
+}
+
+.lb-close {
+  font-size: 1rem;
+}
+
+.lb-nav {
+  font-size: 1.35rem;
+}
+
+.lb-close:hover,
+.lb-nav:hover {
+  border-color: #E8E6E1;
+  background: rgba(232, 230, 225, 0.08);
+}
+
+.lightbox :focus-visible {
+  outline: 2px solid #E8E6E1;
+  outline-offset: 3px;
+}
+
+.lb-figure {
+  grid-row: 2;
+  grid-column: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  justify-self: stretch;
+  gap: clamp(0.6rem, 2vw, 1rem);
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+.lightbox.is-single .lb-figure {
+  grid-column: 1;
+}
+
+/* The whole photograph: no cropping here. */
+#lb-img {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: calc(100vh - 9rem);
+  max-height: calc(100dvh - 9rem);
+  object-fit: contain;
+  border: 1px solid rgba(232, 230, 225, 0.14);
+  background: rgba(232, 230, 225, 0.04);
+}
+
+.lb-cap {
+  max-width: 60ch;
+  color: #E8E6E1;
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  line-height: 1.5;
+  text-align: center;
+  text-transform: uppercase;
+}
 
 /* ============================================================================
    DEPENDENCIES — filled by M4
