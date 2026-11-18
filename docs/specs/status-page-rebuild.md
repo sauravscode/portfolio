@@ -281,3 +281,12 @@ _(filled in by the reviewer as milestones are accepted)_
   html.is-locked set, arrows wrap among the 3 real photos, Tab cycles prev/next/close, Esc closes and restores focus to the opener and unlocks scroll.
   Home and photography both load js/photos.js (placeholder `window.PHOTOS = []`) with a clean console. Smoke: PASS /, PASS /photography/.
 - Fix round 1: index.html now loads js/photos.js so the home Exposures count follows synced photos.
+
+### M3b — ACCEPTED 2026-11-18
+- Evidence (mock Graph API on 127.0.0.1 with fixture JPEGs): 3 images synced (IMAGE, first IMAGE child of a carousel, IMAGE). Skipped: VIDEO,
+  `../evil` id, non-JPEG, foreign media host. A foreign-host `paging.next` was not followed. Ratios 1.5/0.6667/1.0 from SOF; the caption has
+  hashtags stripped and is truncated to 80 chars with "…"; the javascript: permalink became "". Stale `999.jpg` pruned while `notes.txt`/`keepme.png` were kept.
+  `--limit 1` → 1 photo, 2 pruned. `--dry-run` wrote nothing (diff -r clean). Bad token → exit 3 with the token absent from output; missing token → exit 2;
+  network down → exit 4 with the token absent. `allowed_media_url` rejects http CDN, look-alike hosts, query tricks and userinfo.
+  End to end: the synced copy of the site renders 3 loaded plates and the home shows "3 exposures".
+- Owner action: one-time Instagram Creator/Business + Meta app token setup, then `IG_ACCESS_TOKEN=… python3 scripts/sync-instagram.py`.
