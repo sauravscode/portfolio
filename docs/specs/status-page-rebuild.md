@@ -290,3 +290,11 @@ _(filled in by the reviewer as milestones are accepted)_
   network down → exit 4 with the token absent. `allowed_media_url` rejects http CDN, look-alike hosts, query tricks and userinfo.
   End to end: the synced copy of the site renders 3 loaded plates and the home shows "3 exposures".
 - Owner action: one-time Instagram Creator/Business + Meta app token setup, then `IG_ACCESS_TOKEN=… python3 scripts/sync-instagram.py`.
+
+### M4 — ACCEPTED 2026-11-18
+- Evidence: "2 installing · 8 resolved"; lead "# reading.lock — 10 packages"; h2 installing/resolved; 10 `class="book-row-title serif"`.
+  Chips All/Technical/Fiction/Non-fiction/Essays with aria-pressed. Technical → 4 visible ("4 dependencies shown"); Essays → 1 ("1 dependency shown")
+  and the empty installing group is hidden. The live region is empty on load. Year grouping: all years set → h3 2026/2025/2024 with 2/3/3 rows; one missing → flat.
+  Empty current → "Nothing installing."; both empty → no filter bar plus both empty lines; no "undefined". 360px: no overflow.
+  Smoke: PASS /, /photography/, /books/.
+- Polish noted for M5: spacing between the filter bar and the first group head.

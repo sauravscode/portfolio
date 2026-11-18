@@ -1655,5 +1655,153 @@ html.is-locked {
 }
 
 /* ============================================================================
-   DEPENDENCIES — filled by M4
+   DEPENDENCIES
+   ----------------------------------------------------------------------------
+   A lockfile-style manifest: mono labels, hairline-ruled rows, no cards or
+   shadows. Rows read title-left / scope-right on desktop and stack under 600px.
    ========================================================================== */
+
+.dep-lead {
+  margin-bottom: clamp(1.25rem, 4vw, 2rem);
+  color: var(--muted);
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.dep-group + .dep-group {
+  margin-top: clamp(1.75rem, 5vw, 2.75rem);
+}
+
+.dep-group-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.dep-group-title {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  line-height: 1.3;
+}
+
+.dep-count {
+  color: var(--muted);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+}
+
+.dep-year-title {
+  padding-block: 0.85rem 0.3rem;
+  color: var(--muted);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+}
+
+.dep-list {
+  list-style: none;
+  padding: 0;
+}
+
+.dep {
+  display: grid;
+  grid-template-columns: 1.1rem minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.2rem 0.7rem;
+  padding-block: 0.8rem;
+  border-bottom: 1px solid var(--hairline);
+}
+
+/* Author rule: .dep uses display:grid, which would otherwise beat [hidden]. */
+.dep[hidden] {
+  display: none;
+}
+
+.dep-glyph {
+  grid-column: 1;
+  padding-top: 0.1rem;
+  font-size: 0.6875rem;
+  line-height: 1.5;
+}
+
+.dep-glyph--installing {
+  color: var(--signal-active);
+}
+
+.dep-glyph--resolved {
+  color: var(--signal-complete);
+}
+
+.dep-main {
+  grid-column: 2;
+  min-width: 0;
+}
+
+.dep-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.1rem 0.55rem;
+}
+
+.dep-line .book-row-title {
+  font-size: 1.0625rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.dep-author {
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.dep-note {
+  max-width: 58ch;
+  margin-top: 0.2rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-style: italic;
+  line-height: 1.45;
+}
+
+.dep-scope {
+  grid-column: 3;
+  align-self: start;
+  padding: 0.18rem 0.45rem;
+  border: 1px solid var(--hairline);
+  border-radius: 2px;
+  color: var(--muted);
+  font-size: 0.5625rem;
+  letter-spacing: 0.12em;
+  line-height: 1.45;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.dep-empty {
+  padding-block: 0.9rem 0.2rem;
+}
+
+.dep-none {
+  margin-top: 1.1rem;
+}
+
+@media (max-width: 599px) {
+  .dep {
+    grid-template-columns: 1.1rem minmax(0, 1fr);
+  }
+
+  .dep-scope {
+    grid-column: 2;
+    justify-self: start;
+    margin-top: 0.25rem;
+  }
+}
