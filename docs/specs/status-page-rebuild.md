@@ -261,3 +261,14 @@ _(filled in by the reviewer as milestones are accepted)_
   protocol-relative/control-char URLs. `onCall` is correct for in-hours, weekend ("back Mon 09:00"), evening, early morning and an invalid timezone (null).
   `activityCells` gives 30 cells and the right labels, and an invalid start gives "Activity dates not set". The footer shows the updated date, clock, socials and epigraph on all pages.
 - Fix round 1: frame-ancestors console error, mobile nav overflow (406px at 390), weekend on-call wording, changelog role date (2024-01).
+
+### M2 — ACCEPTED 2026-11-18
+- Evidence (headless Chrome via CDP): the status pill shows glyph and text, the owner label shows, and the h1 has the accent; on-call shows "On shift · HH:MM Leeds". Four `details.service` rows,
+  featured open, `class="feat-name serif"` present. Activity bars: 30 cells each, filled 30/23/23/2 matching start/end vs Nov 2026, with correct aria-labels.
+  Filters: Active → 2 rows ("2 services shown"), Complete → 1 ("1 service shown"), aria-pressed flips. Changelog is grouped 2026/2025/2024 newest first.
+  Runbook has 3 paragraphs and 6 notes. Elsewhere counts are 10 exposures and 2 installing · 8 resolved. The copy button falls back to "Press Ctrl+C to copy" headless (no clipboard permission).
+  scrollWidth = viewport at 360/390/1280; no "undefined"; all links/buttons ≥ 24px. Reduced motion: 0 animations, 0 transitions.
+  Empty work/changelog/notes plus an invalid timezone → "No services listed." / "No changes logged.", no filter bar, on-call and clock hidden, no errors.
+  `smoke-portfolio.py`: PASS / (other routes pending M3/M4).
+- Fix round 1: 24px targets (footer/contact/service links), live region empty on load, sections named via aria-labelledby.
+- Scope note: M3 also takes the page side of M3b (window.PHOTOS source, js/photos.js include, picsxarchive links). M3b keeps the sync script.
