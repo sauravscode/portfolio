@@ -1,9 +1,14 @@
 /* ============================================================================
-   core.js — shared helpers, chrome (header/footer), clock, status and
-   activity-bar logic. Page modules import from here.
+   core.js — shared helpers and chrome.
 
-   Rules: all DOM text goes in through textContent; HTML strings are never
-   parsed. URLs from data pass through safeUrl() before they reach an href.
+   Everything here is small on purpose:
+     • el / safeUrl / extLink      — DOM and URL primitives
+     • imageSources / makeImg      — Cloudinary-aware responsive images
+     • renderHeader / renderFooter — the shared chrome
+     • initReveals                 — restrained scroll reveal
+
+   Rules: all text goes in through textContent; HTML strings are never parsed.
+   URLs coming from data pass through safeUrl() before they reach an href.
    ========================================================================== */
 
 export const D = typeof window !== "undefined" ? window.DATA || null : null;
@@ -21,19 +26,6 @@ export function el(tag, cls, text) {
   if (cls) node.className = cls;
   if (text != null) node.textContent = text;
   return node;
-}
-
-/** Render "text with {{accented}} phrases" as text + <em class="accent">. */
-export function accentify(target, value) {
-  if (!target) return target;
-  String(value == null ? "" : value)
-    .split(/\{\{|\}\}/)
-    .forEach((part, i) => {
-      if (!part) return;
-      if (i % 2) target.appendChild(el("em", "accent", part));
-      else target.appendChild(document.createTextNode(part));
-    });
-  return target;
 }
 
 /* ---- URLs ------------------------------------------------------------------ */
@@ -69,366 +61,215 @@ export function extLink(cls, label, href) {
   return a;
 }
 
-/* ---- status metadata ------------------------------------------------------- */
+/* ---- responsive images ----------------------------------------------------- */
 
-const STATUS_META = {
-  operational: { glyph: "●", label: "Operational" },
-  active: { glyph: "◐", label: "Active" },
-  complete: { glyph: "○", label: "Complete" },
-  away: { glyph: "○", label: "Away" },
-};
+const DEFAULT_WIDTHS = [640, 960, 1280, 1920, 2560];
+const CLOUD_NAME = /^[A-Za-z0-9_-]+$/;
+const FOCUS = /^\d{1,3}% \d{1,3}%$/;
 
-/** { glyph, label } for a status level. Glyph is distinct from the label text. */
-export function statusMeta(level) {
-  const key = String(level == null ? "" : level).toLowerCase();
-  if (STATUS_META[key]) return { ...STATUS_META[key] };
-  return {
-    glyph: "○",
-    label: key ? key.charAt(0).toUpperCase() + key.slice(1) : "Unknown",
-  };
+/** The configured Cloudinary cloud name, or "" when unset/placeholder/invalid. */
+function cloudName() {
+  const cloud = D && D.cloudinary && typeof D.cloudinary.cloudName === "string"
+    ? D.cloudinary.cloudName.trim()
+    : "";
+  if (!cloud || cloud === "your-cloud-name") return "";
+  return CLOUD_NAME.test(cloud) ? cloud : "";
 }
 
-/* ---- clock / on-call ------------------------------------------------------- */
-
-const WEEKDAY = { Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6, Sun: 7 };
-const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
-function pad2(n) {
-  return String(n).padStart(2, "0");
+function cleanWidths(widths) {
+  const list = (Array.isArray(widths) ? widths : DEFAULT_WIDTHS)
+    .map((width) => Math.round(Number(width)))
+    .filter((width) => Number.isFinite(width) && width >= 16 && width <= 6000);
+  const unique = Array.from(new Set(list)).sort((a, b) => a - b);
+  return unique.length ? unique : DEFAULT_WIDTHS.slice();
 }
 
-function cityName(site) {
-  return String((site && site.locationLabel) || "Leeds").split(",")[0].trim();
+/** `{ aspect: "3:4" }` → "3:4", or null when the crop is unusable. */
+function cleanCrop(crop) {
+  if (!crop || typeof crop !== "object") return null;
+  const aspect = typeof crop.aspect === "string" ? crop.aspect.trim() : "";
+  const match = /^(\d{1,3}):(\d{1,3})$/.exec(aspect);
+  if (!match) return null;
+  if (Number(match[1]) === 0 || Number(match[2]) === 0) return null;
+  return aspect;
 }
 
-function zonedParts(date, timeZone) {
-  try {
-    const parts = new Intl.DateTimeFormat("en-GB", {
-      timeZone,
-      hourCycle: "h23",
-      hour: "2-digit",
-      minute: "2-digit",
-      weekday: "short",
-    }).formatToParts(date);
-    const out = {};
-    for (const part of parts) out[part.type] = part.value;
-    return out;
-  } catch (err) {
+function cloudinaryUrl(cloud, publicId, width, aspect) {
+  const transform = aspect
+    ? `f_auto,q_auto,c_fill,g_auto,ar_${aspect},w_${width}`
+    : `f_auto,q_auto,c_limit,w_${width}`;
+  return `https://res.cloudinary.com/${cloud}/image/upload/${transform}/${publicId}`;
+}
+
+/**
+ * Responsive sources for one image record ({ publicId, alt, focus }).
+ *
+ * Returns { src, srcset, sizes } or null when the image cannot be resolved.
+ *  • full https:// URLs and root-relative "/…" paths pass through unchanged;
+ *  • Cloudinary public IDs get f_auto,q_auto URLs at each requested width;
+ *  • missing/empty publicId, unset/invalid cloudName, unsafe URLs and IDs
+ *    containing ".." or a backslash all return null.
+ *
+ * @param {object} image
+ * @param {{widths?: number[], crop?: {aspect?: string}, sizes?: string}} [opts]
+ */
+export function imageSources(image, opts = {}) {
+  if (!image || typeof image !== "object") return null;
+
+  const publicId = typeof image.publicId === "string" ? image.publicId.trim() : "";
+  if (!publicId) return null;
+  if (/[\u0000-\u001f\u007f\\]/.test(publicId)) return null;
+  if (publicId.includes("..")) return null;
+
+  // A publicId may be a full https URL or a root-relative path: use it as-is.
+  if (/^https:\/\//i.test(publicId)) {
+    const url = safeUrl(publicId);
+    if (!url || !/^https:\/\//i.test(url)) return null;
+    return { src: url, srcset: null, sizes: null };
+  }
+  if (publicId.startsWith("/")) {
+    const url = safeUrl(publicId);
+    if (!url || !url.startsWith("/") || url.startsWith("//")) return null;
+    return { src: url, srcset: null, sizes: null };
+  }
+
+  // Any other scheme (http:, data:, javascript:, …) is not a Cloudinary ID.
+  if (/^[a-z][a-z0-9+.-]*:/i.test(publicId)) return null;
+  if (publicId.startsWith("#") || publicId.includes("?") || publicId.includes("#")) {
     return null;
   }
-}
 
-/**
- * On-call indicator for a given moment.
- * Returns { on: boolean, label: "On shift · 14:32 Leeds" } or null when the
- * availability data / timezone cannot be interpreted (the UI then hides).
- */
-export function onCall(date = new Date(), site = D && D.site) {
-  if (!site || !site.availability || !site.timezone) return null;
-  const { hours, days } = site.availability;
-  if (!Array.isArray(hours) || hours.length !== 2) return null;
-  if (!Array.isArray(days) || days.length === 0) return null;
+  const cloud = cloudName();
+  if (!cloud) return null;
 
-  const open = Number(hours[0]);
-  const close = Number(hours[1]);
-  if (!Number.isFinite(open) || !Number.isFinite(close) || open === close) return null;
+  const widths = cleanWidths(opts.widths);
+  const aspect = cleanCrop(opts.crop);
+  const sizes = typeof opts.sizes === "string" && opts.sizes.trim()
+    ? opts.sizes.trim()
+    : "100vw";
 
-  const when = date instanceof Date ? date : new Date(date);
-  if (Number.isNaN(when.getTime())) return null;
+  const atMost = widths.filter((width) => width <= 1920);
+  const srcWidth = atMost.length ? atMost[atMost.length - 1] : widths[0];
 
-  const p = zonedParts(when, site.timezone);
-  if (!p) return null;
-
-  const hour = Number(p.hour);
-  const minute = Number(p.minute);
-  const day = WEEKDAY[p.weekday];
-  if (!Number.isFinite(hour) || !Number.isFinite(minute) || !day) return null;
-
-  const now = `${pad2(hour)}:${pad2(minute)}`;
-  const city = cityName(site);
-  const works = new Set(days.map(Number));
-  const workingDay = works.has(day);
-  const inHours = hour >= open && hour < close;
-
-  if (workingDay && inHours) {
-    return { on: true, label: `On shift · ${now} ${city}` };
-  }
-
-  // Next shift start: same day if it is still ahead, otherwise the next
-  // working day from availability.days (ISO 1–7), wrapping around the week.
-  const beforeOpen = hour * 60 + minute < open * 60;
-  let next = null;
-  for (let offset = 0; offset <= 7; offset += 1) {
-    const candidate = ((day - 1 + offset) % 7) + 1;
-    if (!works.has(candidate)) continue;
-    if (offset === 0 && !beforeOpen) continue;
-    next = { day: candidate, offset };
-    break;
-  }
-
-  if (!next) {
-    return { on: false, label: `Off shift · back ${pad2(open)}:00 ${city}` };
-  }
-
-  const prefix = next.offset === 0 ? "" : `${DAY_NAMES[next.day - 1]} `;
   return {
-    on: false,
-    label: `Off shift · back ${prefix}${pad2(open)}:00 ${city}`,
+    src: cloudinaryUrl(cloud, publicId, srcWidth, aspect),
+    srcset: widths
+      .map((width) => `${cloudinaryUrl(cloud, publicId, width, aspect)} ${width}w`)
+      .join(", "),
+    sizes
   };
 }
 
-/* ---- activity bar ---------------------------------------------------------- */
-
-const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-/** "YYYY-MM" → absolute month index, or null. */
-export function monthIndex(value) {
-  if (typeof value !== "string") return null;
-  const m = /^(\d{4})-(\d{2})$/.exec(value.trim());
-  if (!m) return null;
-  const year = Number(m[1]);
-  const month = Number(m[2]);
-  if (month < 1 || month > 12) return null;
-  return year * 12 + (month - 1);
-}
-
-/** Absolute month indices from `a` to `b` inclusive, oldest → newest. */
-export function monthsBetween(a, b) {
-  const start = monthIndex(a);
-  const end = monthIndex(b);
-  if (start === null || end === null || end < start) return [];
-  const out = [];
-  for (let m = start; m <= end; m += 1) out.push(m);
-  return out;
-}
-
-function formatMonth(index) {
-  return `${MONTH_NAMES[index % 12]} ${Math.floor(index / 12)}`;
-}
-
 /**
- * 30-cell activity bar for a service.
- * Returns { cells: boolean[], label } where cells[0] is the oldest month and
- * label is suitable for aria-label. An invalid start (or an end before the
- * start) yields an empty bar and "Activity dates not set".
+ * Build an <img> for an image record, or null when it cannot be resolved.
  *
- * @param {string} start  "YYYY-MM"
- * @param {string|null} end  "YYYY-MM" or null/undefined for ongoing
- * @param {Date} [now]
- * @param {number} [count]
+ * opts: { widths, crop, sizes, eager, priority, className }
+ *  • lazy by default; eager + fetchpriority=high for the hero;
+ *  • object-position from image.focus only when it looks like "50% 35%";
+ *  • on a load error the image removes itself and its parent gets .is-imgless,
+ *    so the layout falls back to the quiet tile instead of a broken icon.
  */
-export function activityCells(start, end, now = new Date(), count = 30) {
-  const size = Number.isFinite(count) && count > 0 ? Math.floor(count) : 30;
-  const empty = Array.from({ length: size }, () => false);
-  const startIndex = monthIndex(start);
-  if (startIndex === null) return { cells: empty, label: "Activity dates not set" };
+export function makeImg(image, opts = {}) {
+  const sources = imageSources(image, opts);
+  if (!sources) return null;
 
-  const when = now instanceof Date && !Number.isNaN(now.getTime()) ? now : new Date();
-  const nowIndex = when.getFullYear() * 12 + when.getMonth();
+  const img = el("img", opts.className || null);
+  img.alt = image && typeof image.alt === "string" ? image.alt : "";
+  img.decoding = "async";
+  img.loading = opts.eager ? "eager" : "lazy";
+  if (opts.priority) img.setAttribute("fetchpriority", "high");
 
-  const ongoing = end == null || end === "";
-  const endIndex = ongoing ? nowIndex : monthIndex(end);
-  if (endIndex === null || endIndex < startIndex) {
-    return { cells: empty, label: "Activity dates not set" };
+  const focus = image && typeof image.focus === "string" ? image.focus.trim() : "";
+  if (FOCUS.test(focus)) img.style.setProperty("object-position", focus);
+
+  img.addEventListener("error", () => {
+    const parent = img.parentNode;
+    if (parent) img.remove();
+    if (parent && parent.classList) parent.classList.add("is-imgless");
+  }, { once: true });
+
+  if (sources.srcset) {
+    img.srcset = sources.srcset;
+    img.sizes = sources.sizes || "100vw";
   }
+  img.src = sources.src;
 
-  const cells = empty.map((_, i) => {
-    const month = nowIndex - (size - 1) + i;
-    return month >= startIndex && month <= endIndex;
-  });
-
-  const label = `Active ${formatMonth(startIndex)} to ${
-    ongoing ? "present" : formatMonth(endIndex)
-  }`;
-  return { cells, label };
+  return img;
 }
 
 /* ---- header ---------------------------------------------------------------- */
 
-/** Build the shared header into #site-head. `page` is "home"|"photography"|"books". */
+/** Build the shared header into #site-head. `page` is "home"|"photography"|"about". */
 export function renderHeader(page = PAGE) {
   const head = document.getElementById("site-head");
   if (!head) return;
 
   const inner = el("div", "wrap head-inner");
 
-  const brand = el("a", "brand");
+  const brand = el("a", "wordmark", "Saurav Sudhar");
   brand.href = ROOT || "./";
-  brand.setAttribute("aria-label", "Saurav Sudhar — status home");
   if (page === "home") brand.setAttribute("aria-current", "page");
-  brand.append(
-    el("span", null, "saurav.sudhar"),
-    el("span", "brand-slash", "/"),
-    el("span", null, "status")
-  );
 
   const nav = el("nav", "nav");
-  nav.id = "site-nav";
   nav.setAttribute("aria-label", "Primary");
 
   const links = [
-    { label: "Services", href: `${ROOT}#services` },
-    { label: "Runbook", href: `${ROOT}#runbook` },
-    { label: "Exposures", href: `${ROOT}photography/`, page: "photography" },
-    { label: "Dependencies", href: `${ROOT}books/`, page: "books" },
-    { label: "Page on-call", href: `${ROOT}#contact` },
+    { label: "Photography", href: `${ROOT}photography/`, page: "photography" },
+    { label: "About", href: `${ROOT}about/`, page: "about" }
   ];
+
   for (const item of links) {
-    const a = el("a", null, item.label);
-    a.href = item.href;
-    if (item.page && item.page === page) a.setAttribute("aria-current", "page");
-    nav.append(a);
+    const link = el("a", "nav-link mono", item.label);
+    link.href = item.href;
+    if (item.page === page) link.setAttribute("aria-current", "page");
+    nav.append(link);
   }
 
-  const actions = el("div", "head-actions");
+  head.classList.toggle("site-head--overlay", page === "home");
 
-  const navToggle = el("button", "nav-toggle", "Menu");
-  navToggle.type = "button";
-  navToggle.setAttribute("aria-expanded", "false");
-  navToggle.setAttribute("aria-controls", "site-nav");
-
-  const themeToggle = el("button", "theme-toggle");
-  themeToggle.type = "button";
-
-  actions.append(navToggle, themeToggle);
-  inner.append(brand, nav, actions);
-  head.append(inner);
-
-  const currentTheme = () =>
-    document.documentElement.dataset.theme === "dark" ? "dark" : "light";
-
-  const syncThemeToggle = () => {
-    const next = currentTheme() === "dark" ? "light" : "dark";
-    themeToggle.textContent = next === "dark" ? "Dark" : "Light";
-    const label = `Switch to ${next} theme`;
-    themeToggle.setAttribute("aria-label", label);
-    themeToggle.setAttribute("title", label);
-  };
-
-  syncThemeToggle();
-
-  themeToggle.addEventListener("click", () => {
-    const next = currentTheme() === "dark" ? "light" : "dark";
-    document.documentElement.dataset.theme = next;
-    try {
-      window.localStorage.setItem("theme", next);
-    } catch (err) {
-      /* Storage blocked: the toggle still works for this session. */
-    }
-    syncThemeToggle();
-  });
-
-  const setOpen = (open) => {
-    head.classList.toggle("is-open", open);
-    navToggle.setAttribute("aria-expanded", String(open));
-    navToggle.textContent = open ? "Close" : "Menu";
-  };
-
-  navToggle.addEventListener("click", () => {
-    setOpen(!head.classList.contains("is-open"));
-  });
-
-  nav.addEventListener("click", (event) => {
-    if (event.target.closest("a")) setOpen(false);
-  });
-
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && head.classList.contains("is-open")) {
-      setOpen(false);
-      navToggle.focus();
-    }
-  });
+  inner.append(brand, nav);
+  head.replaceChildren(inner);
 }
 
 /* ---- footer ---------------------------------------------------------------- */
-
-function startClock(node) {
-  const site = D && D.site;
-  if (!node || !site || !site.timezone) {
-    if (node) node.hidden = true;
-    return;
-  }
-
-  let fmt;
-  try {
-    fmt = new Intl.DateTimeFormat("en-GB", {
-      timeZone: site.timezone,
-      hourCycle: "h23",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch (err) {
-    node.hidden = true;
-    return;
-  }
-
-  try {
-    fmt.format(new Date());
-  } catch (err) {
-    // Some engines only reject an unknown zone when formatting.
-    node.hidden = true;
-    return;
-  }
-
-  const city = cityName(site);
-  const tick = () => {
-    const time = fmt.format(new Date());
-    node.textContent = `${city} ${time}`;
-    node.setAttribute("aria-label", `Local time in ${city}: ${time}`);
-  };
-  tick();
-  window.setInterval(tick, 60_000);
-}
 
 /** Build the shared footer into #site-foot. */
 export function renderFooter() {
   const foot = document.getElementById("site-foot");
   if (!foot) return;
 
+  const site = (D && D.site) || {};
+  const location = typeof site.location === "string" ? site.location : "Leeds, UK";
+  const city = location.split(",")[0].trim() || "Leeds";
+  const name = typeof site.name === "string" && site.name.trim()
+    ? site.name.trim()
+    : "Saurav Sudhar";
+  const year = new Date().getFullYear();
+
   const inner = el("div", "wrap foot-inner");
+  inner.append(el("p", "foot-meta mono", `\u00A9 ${year} ${name} \u00B7 ${city}`));
 
-  const meta = el("div", "foot-meta mono");
-  if (D && D.site && D.site.updated) {
-    meta.append(el("span", null, `Last updated ${D.site.updated}`));
-  }
-  const clock = el("span", "foot-clock");
-  meta.append(clock);
+  const nav = el("nav", "foot-links");
+  nav.setAttribute("aria-label", "Footer");
 
-  const socials = el("ul", "foot-socials");
-  const labels = { github: "GitHub", linkedin: "LinkedIn", instagram: "Instagram" };
-  if (D && D.site && D.site.socials) {
-    for (const [name, href] of Object.entries(D.site.socials)) {
-      const url = safeUrl(href);
-      if (!url) continue;
-      // A bare Instagram profile URL is a placeholder, so it is not shown.
-      if (/^https:\/\/(www\.)?instagram\.com\/?$/i.test(url)) continue;
-      const label = labels[name] || name.charAt(0).toUpperCase() + name.slice(1);
-      const link = extLink("foot-social mono", label, url);
-      if (!link) continue;
-      const item = el("li");
-      item.append(link);
-      socials.append(item);
-    }
+  const email = typeof site.email === "string" ? site.email.trim() : "";
+  const emailLink = email ? extLink("foot-link mono", "Email", `mailto:${email}`) : null;
+  if (emailLink) nav.append(emailLink);
+
+  const socials = site.socials && typeof site.socials === "object" ? site.socials : {};
+  const labels = [["github", "GitHub"], ["linkedin", "LinkedIn"], ["instagram", "Instagram"]];
+
+  for (const [key, label] of labels) {
+    const link = extLink("foot-link mono", label, socials[key]);
+    if (link) nav.append(link);
   }
 
-  inner.append(meta);
-  if (socials.childElementCount) inner.append(socials);
+  const top = el("a", "foot-top mono", "Back to top \u2191");
+  top.href = "#main";
+  nav.append(top);
 
-  if (D && D.hero && D.hero.quote) {
-    const epigraph = el("p", "foot-epigraph serif");
-    epigraph.append(document.createTextNode(`\u201C${D.hero.quote}\u201D`));
-    if (D.hero.quoteAuthor) {
-      epigraph.append(
-        document.createTextNode(" "),
-        el("span", "foot-epigraph-author mono", `\u2014 ${D.hero.quoteAuthor}`)
-      );
-    }
-    inner.append(epigraph);
-  }
-
-  foot.append(inner);
-  startClock(clock);
+  inner.append(nav);
+  foot.replaceChildren(inner);
 }
 
 /* ---- motion ---------------------------------------------------------------- */
