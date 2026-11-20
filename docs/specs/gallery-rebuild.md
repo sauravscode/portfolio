@@ -188,3 +188,11 @@ _(reviewer fills in)_
   backslash, `//`, `data:` and an invalid cloud name are all rejected. AC2/AC3 greps are clean; no references to removed files; `/books/` returns 404.
 - Incident: iCloud had evicted `.git/index` (dataless) when the session restarted. Objects were restored with `brctl download` and the index rebuilt from HEAD
   (`git reset`); `fsck` is clean. Workers from M1-fix onward use `deepseek-v4-pro` (owner request).
+
+### M2 — ACCEPTED 2026-11-20
+- Evidence (fixture photos via the `/images/…` passthrough): hero 900/900 = 100svh; img fetchpriority=high, eager, object-position from focus, fades in;
+  one h1 = name, tagline from data. 3 panel links (about/#work, photography/, about/#contact) with aria-labels; 479×765 each at 1440 (3 columns),
+  390×630 stacked at 390. Fallbacks: default data → 0 `<img>`, hero.is-imgless, panels #151513; a 404 image removes itself plus the scrim. Reduced motion:
+  0 transitions/animations, hero opacity 1, reveals static. No overflow at 1440/1024/390.
+- Fix round 1: hero content and cue aligned to the header frame (wordmark x = name x at 1440/1024/390); panel titles share one baseline (607px in all
+  three); captions ≤ 2 lines.

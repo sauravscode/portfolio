@@ -373,11 +373,219 @@ em {
     opacity: 1;
     transform: none;
   }
+
+  /* M2: the hero photograph appears at once; panels do not zoom. */
+  .hero-img {
+    opacity: 1;
+  }
+
+  .panel:hover .panel-img,
+  .panel:focus-visible .panel-img {
+    transform: none;
+  }
 }
 
 /* ============================================================================
    HOME — hero and panels (M2)
    ========================================================================== */
+
+/* ---- hero ------------------------------------------------------------------ */
+
+.hero {
+  position: relative;
+  height: 100svh;
+  min-height: 560px;
+  overflow: hidden;
+  background: var(--ground);
+
+  /* Same horizontal frame as the header's .wrap (max-width 1200px centred,
+     inset by the gutter), so the hero name and Scroll cue line up with the
+     wordmark and nav at ≥ 640px. Below that the frame collapses to the gutter. */
+  --frame: max(var(--gutter), calc((100vw - var(--wrap)) / 2 + var(--gutter)));
+}
+
+/* No resolvable image: keep the plain ground, never a fallback tile. */
+.hero.is-imgless {
+  background: var(--ground);
+}
+
+.hero-img {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+
+.hero-img.is-loaded {
+  opacity: 1;
+}
+
+.hero-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.35), transparent 25%),
+    linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.15) 45%, transparent 70%);
+}
+
+.hero-content {
+  position: absolute;
+  left: var(--frame);
+  right: var(--frame);
+  bottom: 0;
+  z-index: 2;
+  padding: 0 0 clamp(48px, 10vh, 120px);
+}
+
+.hero-name {
+  margin: 0;
+  font-size: clamp(3.5rem, 11vw, 10rem);
+  font-weight: 300;
+  line-height: 0.9;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.hero-tagline {
+  margin-top: 1.1rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.hero-cue {
+  position: absolute;
+  right: var(--frame);
+  bottom: clamp(48px, 10vh, 120px);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.6875rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.hero-cue::after {
+  content: "";
+  width: 1px;
+  height: 48px;
+  background: var(--ink);
+}
+
+/* ---- panels ---------------------------------------------------------------- */
+
+.panels {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--ground);
+}
+
+.panel {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 85vh;
+  overflow: hidden;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.panel-media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.panel-media.is-imgless {
+  background: var(--fallback);
+}
+
+.panel-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.2s var(--ease);
+}
+
+.panel-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent 60%);
+}
+
+.panel-text {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: auto;
+  bottom: clamp(64px, 12vh, 120px);
+  z-index: 2;
+  padding: 0 var(--gutter);
+  text-align: center;
+}
+
+.panel-title {
+  margin: 0;
+  font-size: clamp(2rem, 3.6vw, 3.25rem);
+  font-weight: 300;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.panel-caption {
+  max-width: min(34ch, 86%);
+  margin: 0.75rem auto 0;
+  line-height: 1.6;
+  min-height: calc(2 * 1.6em);
+  color: var(--ink);
+}
+
+.panel:hover .panel-img,
+.panel:focus-visible .panel-img {
+  transform: scale(1.04);
+}
+
+.panel:focus-visible {
+  outline: 1px solid var(--ink);
+  outline-offset: -6px;
+}
+
+/* ---- hero + panels on small screens --------------------------------------- */
+
+@media (max-width: 899.98px) {
+  .panels {
+    grid-template-columns: 1fr;
+  }
+
+  .panel {
+    min-height: 70svh;
+  }
+}
+
+@media (max-width: 639.98px) {
+  .hero-content {
+    text-align: center;
+  }
+
+  .hero-cue {
+    display: none;
+  }
+}
 
 /* ============================================================================
    PHOTOGRAPHY — masonry grid (M3)
