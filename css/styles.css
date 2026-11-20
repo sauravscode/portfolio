@@ -294,6 +294,45 @@ em {
 }
 
 /* ============================================================================
+   TOUCH TARGETS
+   ----------------------------------------------------------------------------
+   Every nav/contact link is at least 24×24px (WCAG target size), and on touch
+   screens the primary links grow to 44px tall. Height is added with padding so
+   the inline-flex labels stay centred and each row keeps its alignment. The
+   visible type size is untouched.
+   ========================================================================== */
+
+.wordmark,
+.nav-link,
+.foot-link,
+.foot-top,
+.contact-social,
+.page-sub-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+}
+
+.nav-link,
+.foot-link,
+.foot-top,
+.contact-social,
+.page-sub-link {
+  min-width: 24px;
+}
+
+@media (pointer: coarse) {
+  .nav-link,
+  .foot-link,
+  .contact-social,
+  .page-sub-link {
+    /* 44px tap target: the mono line-height (1.4em) plus symmetric padding,
+       centred by the base inline-flex + align-items:center. */
+    padding-block: calc((44px - 1.4em) / 2);
+  }
+}
+
+/* ============================================================================
    UTILITIES
    ========================================================================== */
 

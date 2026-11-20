@@ -1,6 +1,6 @@
 # Spec — "GALLERY": a simple, grand, image-led portfolio
 
-Status: **APPROVED 2026-11-20 — in progress** (owner changes: panel renamed from "Engineering"; Clarke quote kept inside Work)
+Status: **COMPLETE 2026-11-20 — awaiting owner review and push** (owner changes: panel renamed from "Engineering"; Clarke quote kept inside Work)
 Branch: `version2` (starting HEAD `62ce919`, the UPTIME build). Replaces UPTIME (`docs/specs/status-page-rebuild.md`), which the owner rejected.
 Owner edits to preserve (never stage or modify unless named below): `.claude/settings.json`, the "Claude and DeepSeek workflow"
 section of `README.md`, `.claude/skills/`, `docs/dual-agent.md`, `scripts/pi-worker`. `scripts/smoke-portfolio.py` is changed **only** in M4,
@@ -205,3 +205,13 @@ _(reviewer fills in)_
   a visually-hidden h2 and the work text. `#contact` has a mailto link and 3 socials. No "undefined". Portrait bottom 801 vs #work top 927 (gap fixed).
 - Nav current state fixed (current = ink + underline, others muted). Reduced motion: 0 transitions/animations on all 3 pages.
 - Fix round 1: nav current state, lightbox opacity and caption spacing, about bottom padding, live photo count.
+
+### M4 — ACCEPTED 2026-11-20
+- Targets: 0 links/buttons under 24px on all pages at 390/1440 (nav 24px; header 60/90px). Contrast sweep over page text: 0 failures. No overflow at
+  360/390/768/1440 on any page. Console/CSP clean on 3 pages × 390/1440, with default data and with fixture photos. Reduced motion: 0 transitions/animations
+  everywhere. AC2 greps clean.
+- README rewritten with a step-by-step Cloudinary guide; the owner's workflow section is kept as an uncommitted owner edit.
+- `scripts/smoke-portfolio.py`: only PAGES changed (owner-approved). It remains the owner's uncommitted file. Result: PASS /, PASS /photography/, PASS /about/.
+- Fix round 1: README spec-link text (quoting error in the reviewer's own assignment).
+- Infra: .git moved to ~/.git-stores/portfolio.git with a pointer file (owner approved) after repeated iCloud evictions; the backup is at .git-icloud-old.
+- Not verified: 44px coarse-pointer targets (headless doesn't emulate pointer:coarse); real Cormorant/DM Mono rendering (fonts are blocked offline in the harness).

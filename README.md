@@ -1,69 +1,81 @@
 # Saurav Sudhar — Portfolio
 
-**"UPTIME."** The site is the status page of an engineering practice. Visitors
-already know how to read services, components, a changelog, a runbook and a
-contact page — so the portfolio borrows that familiar shape and spends its
-novelty on the metaphor, not on the interaction.
+**GALLERY** — a simple, grand, image-led portfolio. Dark as a gallery and quiet
+as a gallery: near-black ground, ivory serif type, and Saurav's own photographs
+doing the talking. Three pages — **Home** (a full-screen hero with the name set
+large, then three tall panels: Foundations, Photography, Contact),
+**Photography** (a masonry grid with a keyboard lightbox), and **About** (the
+story, the Clarke quote in the Work section, and contact). No cards, no badges,
+no metrics — just the photos and the fewest words.
 
-It is a credible engineer's portfolio first and a status page second. Light by
-default, with a dark mode. Built with **vanilla HTML, CSS and JavaScript — no
-framework, no build step.**
+## The one rule
 
-| Portfolio content | Status-page element |
-|---|---|
-| Projects | **Services** — status pill, activity bar, expandable details |
-| Project stack | **Components** of a service |
-| Career/news log | **Changelog** / history feed |
-| About + field log | **Runbook** — "About the operator" |
-| Contact | **Page the on-call** — email, copy, socials, availability |
-| Photography | **Exposures** — captions formatted as readings |
-| Books | **Dependencies** — a manifest of `installing` / `resolved` |
+**Edit [`js/data.js`](js/data.js) only.** Every page reads from the `DATA`
+object in that one file and renders itself. The name, tagline, email, socials,
+the hero photo, the three panels, the About text, the Clarke quote, and every
+gallery photograph live there, each with a comment. Change nothing else.
 
-## The honesty rule
+## Adding your photos (Cloudinary)
 
-There are **no invented metrics**. No uptime percentages, no latency, no
-visitor counts. Every number and status comes from `js/data.js` or the real
-clock. Activity bars show the months a project was active, taken from
-`start`/`end`, and are labelled "activity", never "uptime". The banner reflects
-the status the owner writes in `site.status`, not a computed health check.
+Photos are served by [Cloudinary](https://cloudinary.com) — never committed to
+this repo. You upload the original once, and Cloudinary makes the responsive
+AVIF/WebP versions at every screen size, for free (the free tier is far more
+than a personal portfolio needs).
+
+**One-time setup**
+
+1. Create a free account at [cloudinary.com](https://cloudinary.com).
+2. Open the **Dashboard** and copy your **Cloud name**.
+3. Paste it into `cloudinary.cloudName` in `js/data.js`.
+
+**Per photo**
+
+1. Open **Media Library** and upload the original — **2000–3000px on the long
+   edge, JPEG, sRGB**. Don't pre-resize; Cloudinary does that for you.
+2. Optionally put it in a `portfolio` folder to keep names tidy.
+3. Click the asset and copy its **Public ID** — e.g. `portfolio/derwent-dawn`
+   (the folder is part of the ID).
+4. Paste that string into the right `publicId`:
+   - `hero.image` — the full-screen opening photo;
+   - `panels[i].image` — one of the three home panels;
+   - `about.image` — the About portrait;
+   - `photography.photos[]` — a gallery entry.
+5. Add a short `alt` saying what the photo shows.
+6. For gallery photos set `ratio` = width ÷ height (3:2 → `1.5`, 2:3 → `0.667`).
+7. For the hero, set `focus` to choose which part survives the crop — e.g.
+   `"50% 35%"`.
+8. Save, commit, push — GitHub Pages redeploys.
+
+**Why Cloudinary** — automatic AVIF/WebP and per-screen sizes, nothing heavy in
+git, and a free tier far beyond this site's traffic.
+
+**Escape hatch** — a `publicId` may also be a full `https://` image URL, or a
+committed root-relative path like `/images/derwent.jpg`. Those are used exactly
+as written.
+
+**Before you add photos** the site stays calm: the hero and panels fall back to
+the plain dark ground, and the Photography page shows a single line,
+"Photographs coming soon." No broken-image icons, ever.
 
 ## Files
 
 ```
 portfolio/
-├── index.html                  # home — status banner, services, changelog, runbook
-├── photography/index.html      # Exposures — gallery + lightbox
-├── books/index.html            # Dependencies — reading manifest
-├── css/styles.css              # the design system, one sectioned file
+├── index.html                  # Home — hero + three panels
+├── photography/index.html      # Photography — masonry + lightbox
+├── about/index.html            # About — portrait, Work quote, contact
+├── css/styles.css              # the whole design system, one sectioned file
 ├── js/
-│   ├── theme.js                # sets the theme before first paint (classic script)
 │   ├── data.js                 # ← ALL content lives here. Edit this, nothing else.
-│   ├── photos.js               # generated by scripts/sync-instagram.py
 │   ├── app.js                  # thin entry point / page router
-│   ├── core.js                 # helpers, theme, header/footer, clock
-│   ├── home.js                 # home page renderer
-│   ├── photography.js          # Exposures renderer
-│   └── books.js                # Dependencies renderer
+│   ├── core.js                 # helpers, images, header/footer, reveals
+│   ├── home.js                 # hero + panels renderer
+│   ├── photography.js          # masonry + lightbox renderer
+│   └── about.js                # portrait + work + contact renderer
 ├── scripts/
-│   └── sync-instagram.py       # Instagram → local photos + js/photos.js
+│   └── smoke-portfolio.py      # headless-Chrome smoke test
 └── README.md
 ```
-
-## ✦ The one rule
-
-**To change any content, edit [`js/data.js`](js/data.js) only.** The pages read
-from the `DATA` object and render themselves. Every section is commented in
-that file.
-
-The status-page fields are owner-maintained — never computed:
-
-- `site.status` — `{ level: "operational" | "active" | "away", label }`, the banner.
-- `site.availability` — `{ hours: [9, 18], days: [1, 2, 3, 4, 5] }`, the on-call window in `site.timezone`.
-- `site.updated` — `"YYYY-MM"`, the footer's "last updated".
-- `work[].status` — `"operational" | "active" | "complete"`.
-- `work[].start` / `work[].end` — `"YYYY-MM"` (or `null` when ongoing), the activity bar.
-- `work[].changes` — optional `[{ date, text }]` history for a service.
-- `changelog` — `[{ date, kind: "role" | "ship" | "event" | "move", text }]`, newest first by date.
 
 ## Running locally
 
@@ -72,95 +84,35 @@ python3 -m http.server 8000 --bind 127.0.0.1
 # → http://127.0.0.1:8000
 ```
 
-## Photography — Instagram sync (primary)
-
-Photos come from [@picsxarchive](https://www.instagram.com/picsxarchive/).
-`scripts/sync-instagram.py` downloads IMAGE posts from the official Instagram
-Graph API, reads each JPEG's aspect ratio, and writes `js/photos.js`
-(`window.PHOTOS = [{ src, ratio, caption, permalink, date }]`). It uses only the
-Python standard library. `VIDEO` is skipped; a carousel uses its first image.
-
-**One-time setup**
-
-1. Use an Instagram **Creator or Business** account for the archive.
-2. Create a Meta app with the **"Instagram API with Instagram Login"** product.
-3. Generate a **long-lived token** (about 60 days) and keep it somewhere safe.
-
-**Sync**
-
-```bash
-IG_ACCESS_TOKEN=… python3 scripts/sync-instagram.py [--limit 24] [--dry-run]
-```
-
-The token is read from the environment only — it is never written to disk,
-logged, or printed in errors. `--dry-run` downloads and reports but writes
-nothing. Afterwards, commit `photography/img/` and `js/photos.js`. Re-run after
-posting to pick up new frames (files no longer in the feed are pruned).
-
-**Cloudinary fallback**
-
-If `window.PHOTOS` is empty, the page falls back to `photography.photos`. Set
-`photography.cloudName` to your [Cloudinary](https://cloudinary.com) cloud name
-and add entries to `photography.photos`:
-
-```js
-{ publicId: "portfolio/derwent-water", ratio: 1.5,
-  caption: "Derwent Water, dawn", exif: "24mm · f/8 · 1/60 · ISO 100" },
-```
-
-`ratio` is width ÷ height (3:2 → `1.5`, 2:3 → `0.667`); `exif` is optional.
-Responsive `f_auto,q_auto` URLs, blur-up loading and reserved aspect ratios are
-handled for you. With no cloud name and no feed, plates render honestly as
-**PENDING UPLOAD** frames — never broken images.
-
-## Books
-
-Two shelves in `reading`: `current` (shown as **installing**) and `finished`
-(**resolved**). A book's `tag` is its dependency **scope**. `note` is optional
-and renders in italic serif. If **every** finished entry has a `year`, the
-resolved group splits by year, newest first; otherwise it stays flat.
-
-## Design system
-
-- **Type:** Instrument Sans (UI/body), Instrument Serif (hero and section
-  headings), JetBrains Mono (labels, dates, EXIF, statuses).
-- **Light tokens:** paper `#F4F3EF`, surface `#FFFFFF`, ink `#15171A`, muted
-  `#5B6068`, hairline `#DEDCD5`; operational `#1A7A43`, active `#8F5500`,
-  complete `#5B6068`, link `#1F5FBF`.
-- **Dark tokens:** paper `#0F1113`, surface `#16191C`, ink `#E8E6E1`, muted
-  `#9AA0A8`, hairline `#2A2E33`; operational `#3DBE72`, active `#E3A43A`,
-  complete `#9AA0A8`, link `#7AA7F0`.
-- **Layout:** one centred 960px column, hairline-ruled rows, generous
-  whitespace. No card grids, gradients or shaders. One recurring motif: the
-  30-cell activity bar.
-- **Motion:** opacity/translate reveals ≤ 300ms, a subtle pulse on operational
-  status dots, and `<details>` expansion. Everything is disabled under
-  `prefers-reduced-motion` (including smooth scrolling and the pulse).
-- **Status:** never conveyed by colour alone — every pill carries a text label
-  and a distinct glyph (● ◐ ○).
-- **Security:** a CSP meta tag on every page with no `'unsafe-inline'`;
-  no inline scripts or styles; data is rendered with `textContent`, never
-  `innerHTML`; URLs pass through `safeUrl`; outbound links use
-  `rel="noopener noreferrer"`.
-- **Accessibility:** semantic landmarks and a skip link, native
-  `<details>/<summary>` services, `aria-pressed` filters, polite live regions,
-  visible focus rings, ≥ 24×24px targets, a focus-trapped lightbox that
-  restores focus on close, and a `<noscript>` fallback with the email and GitHub.
-
 ## Testing
 
 ```bash
 python3 scripts/smoke-portfolio.py
 ```
 
-The smoke test checks all three routes and the content markers the renderers
-depend on (`feat-name serif`, `plate-cap`, `book-row-title serif`).
+The smoke test opens each route in headless Chrome and checks the marker
+element its renderer is expected to produce.
+
+## Design system
+
+- **Type:** Cormorant Garamond (display and body) + DM Mono (the tiny
+  letter-spaced captions and nav). One Google Fonts request, `display=swap`.
+- **Colour:** ground `#0B0B0A`, ink `#ECE6DA`, muted `#A8A196`; the whole site
+  is dark. Photos are the only colour.
+- **Motion:** a hero fade and a gentle panel zoom, content reveals ≤ 600ms —
+  all disabled under `prefers-reduced-motion`.
+- **Security:** a CSP meta tag with no `'unsafe-inline'`; no inline scripts or
+  styles; content rendered with `textContent`, never `innerHTML`; every URL
+  passes through `safeUrl`.
+- **Accessibility:** landmarks, a skip link, a keyboard lightbox with a focus
+  trap that restores focus on close, visible focus rings, and ≥ 24px touch
+  targets.
 
 ## Deploying
 
-Static files — GitHub Pages (`main` / root) or drop the folder on Netlify.
-The CSP is enforced with a `<meta>` tag. `frame-ancestors` and other
-header-only directives cannot be set in a meta tag; configure them at the host
-level (for example, a `_headers` file on Netlify) if you want them.
+Static files — GitHub Pages (`main` / root) or drop the folder on Netlify. The
+CSP is enforced with a `<meta>` tag. `frame-ancestors` and other header-only
+directives cannot be set in a meta tag; configure them at the host level (a
+`_headers` file on Netlify, for example) if you want them.
 
-*Spec: [`docs/specs/status-page-rebuild.md`](docs/specs/status-page-rebuild.md).*
+*Spec: [`docs/specs/gallery-rebuild.md`](docs/specs/gallery-rebuild.md).*
