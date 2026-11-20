@@ -196,3 +196,12 @@ _(reviewer fills in)_
   0 transitions/animations, hero opacity 1, reveals static. No overflow at 1440/1024/390.
 - Fix round 1: hero content and cue aligned to the header frame (wordmark x = name x at 1440/1024/390); panel titles share one baseline (607px in all
   three); captions ≤ 2 lines.
+
+### M3 — ACCEPTED 2026-11-20
+- Photography (fixtures: 5 real + 1 missing): masonry with 3/2/1 columns at 1440/900/390 and reserved ratios; the broken tile is hidden and the count
+  updates to "5 photographs". Lightbox: opens on the clicked photo, focus on Close, html.is-locked, arrows wrap, Tab cycles Prev/Next/Close, Esc closes and
+  restores focus to the opener. Backdrop is opaque; caption and count are separate spans. Empty data → "Photographs coming soon." only; all-broken → same.
+- About: two columns at 1440 (497 | 521), stacked at 390, imgless tile hidden on mobile. `#work` has the Clarke quote as blockquote + figcaption "— Arthur C. Clarke",
+  a visually-hidden h2 and the work text. `#contact` has a mailto link and 3 socials. No "undefined". Portrait bottom 801 vs #work top 927 (gap fixed).
+- Nav current state fixed (current = ink + underline, others muted). Reduced motion: 0 transitions/animations on all 3 pages.
+- Fix round 1: nav current state, lightbox opacity and caption spacing, about bottom padding, live photo count.

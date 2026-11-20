@@ -229,13 +229,26 @@ em {
 }
 
 .nav-link {
-  color: var(--ink);
+  color: var(--muted);
   text-decoration: none;
   white-space: nowrap;
 }
 
+.nav-link:hover,
+.nav-link:focus-visible,
 .nav-link[aria-current="page"] {
-  color: var(--muted);
+  color: var(--ink);
+}
+
+.nav-link[aria-current="page"] {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.5em;
+}
+
+/* Over the home hero there is no current link; every nav link reads bright. */
+.site-head--overlay .nav-link {
+  color: var(--ink);
 }
 
 /* ============================================================================
@@ -382,6 +395,11 @@ em {
   .panel:hover .panel-img,
   .panel:focus-visible .panel-img {
     transform: none;
+  }
+
+  /* M3: gallery photos appear at once; the hover caption snaps instead of fading. */
+  .shot-img {
+    opacity: 1;
   }
 }
 
@@ -591,10 +609,370 @@ em {
    PHOTOGRAPHY — masonry grid (M3)
    ========================================================================== */
 
+/* The count + Instagram line under the page title. */
+.page-sub a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 0.22em;
+}
+
+.gallery-empty {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 1.5rem;
+  line-height: 1.4;
+  color: var(--muted);
+  text-align: center;
+  padding-block: clamp(4rem, 14vh, 8rem);
+}
+
+/* CSS-column masonry: 1 col < 640, 2 cols 640–1099, 3 cols ≥ 1100. */
+.masonry {
+  column-count: 1;
+  column-gap: clamp(16px, 2.4vw, 32px);
+}
+
+.masonry-item {
+  break-inside: avoid;
+  margin-bottom: clamp(16px, 2.4vw, 32px);
+}
+
+@media (min-width: 640px) {
+  .masonry {
+    column-count: 2;
+  }
+}
+
+@media (min-width: 1100px) {
+  .masonry {
+    column-count: 3;
+  }
+}
+
+/* Each photograph is a button that opens the lightbox. */
+.shot {
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  text-align: left;
+}
+
+.shot-frame {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: var(--ratio, 1.5);
+  overflow: hidden;
+  background: var(--fallback);
+}
+
+.shot-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 600ms var(--ease);
+}
+
+.shot-img.is-loaded {
+  opacity: 1;
+}
+
+/* Caption: tiny mono line on a small scrim, shown on hover/focus. On touch
+   devices (no hover) it is always visible. */
+.shot-cap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  padding: 2rem 1rem 0.75rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+  color: var(--ink);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+
+.shot:hover .shot-cap,
+.shot:focus-visible .shot-cap {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .shot-cap {
+    opacity: 1;
+  }
+}
+
 /* ============================================================================
    LIGHTBOX — viewer (M3)
    ========================================================================== */
 
+/* Scroll lock: added to <html> while the viewer is open. */
+html.is-locked {
+  overflow: hidden;
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(16px, 3vw, 32px);
+  background: rgb(8, 8, 7);
+}
+
+.lb-figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  max-width: 92vw;
+  max-height: 88vh;
+  margin: 0;
+}
+
+#lb-img {
+  max-width: 92vw;
+  max-height: 82vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.lb-cap {
+  text-align: center;
+  color: var(--ink);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+}
+
+.lb-count {
+  margin-left: 2.5em;
+}
+
+.lb-close,
+.lb-prev,
+.lb-next {
+  position: absolute;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  color: var(--ink);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.lb-close {
+  top: clamp(16px, 3vw, 32px);
+  right: clamp(16px, 3vw, 32px);
+}
+
+.lb-prev {
+  left: clamp(16px, 3vw, 32px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.lb-next {
+  right: clamp(16px, 3vw, 32px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* On small screens Prev/Next move to the bottom corners. */
+@media (max-width: 639.98px) {
+  .lb-prev {
+    top: auto;
+    bottom: 16px;
+    left: 16px;
+    transform: none;
+  }
+
+  .lb-next {
+    top: auto;
+    bottom: 16px;
+    right: 16px;
+    transform: none;
+  }
+}
+
 /* ============================================================================
    ABOUT — portrait, work, contact (M3)
    ========================================================================== */
+
+#work,
+#contact {
+  scroll-margin-top: 24px;
+}
+
+/* M3 fix: end the portrait + text block well above the #work hairline. */
+#about-main {
+  padding-bottom: clamp(80px, 14vh, 160px);
+}
+
+/* ---- portrait + text ------------------------------------------------------ */
+
+.about-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 45%) minmax(0, 55%);
+  gap: clamp(32px, 6vw, 96px);
+  align-items: start;
+  padding-top: clamp(48px, 10vh, 120px);
+}
+
+.about-photo {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--fallback);
+}
+
+.about-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.about-text {
+  min-width: 0;
+}
+
+.about-title {
+  margin: 0 0 clamp(1.5rem, 3vh, 2.5rem);
+  font-size: clamp(3rem, 7vw, 6rem);
+  font-weight: 300;
+}
+
+.about-para {
+  margin: 0 0 1.5em;
+  max-width: 34em;
+  font-size: clamp(1.2rem, 1.6vw, 1.375rem);
+  line-height: 1.6;
+}
+
+.about-now {
+  margin-top: 2.5rem;
+  color: var(--ink);
+}
+
+.about-now-label {
+  margin-right: 1.25rem;
+  color: var(--muted);
+}
+
+@media (max-width: 899.98px) {
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: clamp(32px, 6vw, 64px);
+  }
+
+  .about-photo {
+    width: 100%;
+    max-height: 70svh;
+  }
+
+  /* A missing portrait never dominates a stacked page. */
+  .about-photo.is-imgless {
+    display: none;
+  }
+}
+
+/* ---- work pause ----------------------------------------------------------- */
+
+.measure-wide {
+  max-width: 900px;
+  margin-inline: auto;
+}
+
+.work {
+  padding-block: clamp(80px, 14vh, 160px);
+  border-top: 1px solid var(--line);
+}
+
+.section-label {
+  color: var(--muted);
+}
+
+.quote {
+  margin: clamp(2rem, 5vh, 4rem) 0 0;
+}
+
+.quote-text {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(2rem, 5vw, 3.75rem);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.quote-cite {
+  margin-top: 1.5rem;
+  color: var(--muted);
+}
+
+.work-text {
+  max-width: 38em;
+  margin-top: clamp(2rem, 5vh, 3.5rem);
+  color: var(--ink);
+}
+
+/* ---- contact -------------------------------------------------------------- */
+
+.contact {
+  padding-block: clamp(80px, 14vh, 160px);
+  border-top: 1px solid var(--line);
+}
+
+.contact-title {
+  margin: 0;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 300;
+}
+
+.contact-email {
+  display: inline-block;
+  margin-top: 1.75rem;
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-size: clamp(1.5rem, 3.4vw, 2.6rem);
+  line-height: 1.15;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.contact-email:hover,
+.contact-email:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.contact-socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+  margin-top: 2.5rem;
+}
+
+.contact-social {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.contact-social:hover,
+.contact-social:focus-visible {
+  color: var(--muted);
+}

@@ -1,72 +1,32 @@
 /* ============================================================================
-   photography.js — the gallery grid and the lightbox.
-   ----------------------------------------------------------------------------
-   M1 keeps the module quiet: render() does nothing yet. The two proven pieces
-   from the previous build are ported below and stay unexported until M3:
-     • the Cloudinary URL builder (cloudUrl / cloudNameOf / cloudSources),
-       including full-URL and root-relative passthrough, cloud-name validation
-       and rejection of backslashes/"..";
-     • initLightbox(), the accepted focus-trapped dialog (Esc, ← →, Tab trap,
-       focus restore, scroll lock).
+   photography.js — the gallery grid and the lightbox (M3).
 
-   Rules: no HTML parsing; URLs pass safeUrl(); optional fields render nothing.
+   The Cloudinary helpers once private to this module now live in core.js
+   (imageSources / makeImg), so the whole site shares one image path. What
+   remains here is the page itself: resolve the photos, render the masonry
+   grid with hover captions, and adapt the accepted focus-trapped lightbox
+   (Esc, ← →, Tab trap, focus restore, scroll lock) to the grid buttons.
+
+   Rules: no HTML parsing; all text goes through textContent; URLs through
+   safeUrl/extLink; images through imageSources/makeImg. Optional fields
+   (exif, caption) simply render nothing when missing.
    ========================================================================== */
 
-import { D, safeUrl } from "./core.js";
+import { D, el, extLink, imageSources, makeImg } from "./core.js";
 
-/* ============================================================================
-   CLOUDINARY SOURCES — used by the M3 renderer.
-   ========================================================================== */
+const SHOT_WIDTHS = [480, 800, 1200, 1600];
+const SHOT_SIZES =
+  "(min-width: 1100px) 31vw, (min-width: 640px) 46vw, 92vw";
 
-/** A Cloudinary cloud name is a host label, so keep it to host-safe chars. */
-function cloudNameOf(data) {
-  const source = data && typeof data === "object" ? data : D;
-  const fromCloudinary = source && source.cloudinary && typeof source.cloudinary.cloudName === "string"
-    ? source.cloudinary.cloudName
-    : "";
-  const fallback = source && typeof source.cloudName === "string" ? source.cloudName : "";
-  const cloud = (fromCloudinary || fallback).trim();
-  if (!cloud || cloud === "your-cloud-name") return "";
-  return /^[A-Za-z0-9_-]+$/.test(cloud) ? cloud : "";
-}
-
-function cloudUrl(cloud, publicId, width, extra = "") {
-  return `https://res.cloudinary.com/${cloud}` +
-         `/image/upload/f_auto,q_auto,w_${width},c_limit${extra}/${publicId}`;
-}
-
-/**
- * Sources for one Cloudinary photo record ({ publicId, ratio, caption, exif? }).
- * A publicId may itself be a full https URL or a root-relative path.
- * Returns { src, large, srcset, sizes } or null when nothing can be resolved.
- */
-function cloudSources(image, cloud) {
-  if (!image || typeof image.publicId !== "string") return null;
-  const publicId = image.publicId.trim();
-  if (!publicId || publicId.includes("\\") || publicId.includes("..")) return null;
-
-  if (/^(https?:\/\/|\/)/i.test(publicId)) {
-    const url = safeUrl(publicId);
-    if (!url || !/^(https:\/\/|\/)/i.test(url) || url.startsWith("//")) return null;
-    return { src: url, large: url, srcset: null, sizes: null };
-  }
-
-  // Any other scheme (javascript:, data:, …) is not a public ID.
-  if (/^[a-z][a-z0-9+.-]*:/i.test(publicId)) return null;
-  if (!cloud) return null;
-
-  return {
-    src: cloudUrl(cloud, publicId, 1200),
-    large: cloudUrl(cloud, publicId, 1600),
-    srcset: [640, 960, 1280, 1920, 2560]
-      .map((width) => `${cloudUrl(cloud, publicId, width)} ${width}w`)
-      .join(", "),
-    sizes: "(max-width: 639px) 92vw, (max-width: 1099px) 46vw, 30vw"
-  };
+/** A safe aspect ratio for the frame: finite, within 0.2–5, else 1.5. */
+function cleanRatio(value) {
+  const ratio = Number(value);
+  if (Number.isFinite(ratio) && ratio >= 0.2 && ratio <= 5) return ratio;
+  return 1.5;
 }
 
 /* ============================================================================
-   LIGHTBOX — the accepted focus-trapped dialog, restyled in M3.
+   LIGHTBOX — the accepted focus-trapped dialog, adapted to the grid buttons.
    ========================================================================== */
 
 /**
@@ -107,16 +67,16 @@ function initLightbox(photos, openers) {
     const { photo } = list[pos];
     const caption = photo.caption || "Untitled";
 
-    img.src = photo.sources.large || photo.sources.src;
-    if (photo.sources.srcset) {
-      img.srcset = photo.sources.srcset;
-      img.sizes = "92vw";
-    } else {
-      img.removeAttribute("srcset");
-      img.removeAttribute("sizes");
-    }
+    // The largest source the record can offer (passthrough URLs come back as-is).
+    img.src = photo.sources.src;
+    img.removeAttribute("srcset");
+    img.removeAttribute("sizes");
     img.alt = caption;
-    cap.textContent = `${caption}  ${pos + 1} / ${list.length}`;
+    const capText = el("span", "lb-cap-text");
+    capText.textContent = `${caption}${photo.exif ? " · " + photo.exif : ""}`;
+    const count = el("span", "lb-count");
+    count.textContent = `${pos + 1} / ${list.length}`;
+    cap.replaceChildren(capText, count);
     refreshNav();
   }
 
@@ -145,6 +105,7 @@ function initLightbox(photos, openers) {
   btnPrev.addEventListener("click", () => show(current - 1));
   btnNext.addEventListener("click", () => show(current + 1));
 
+  // Clicking the backdrop (the box itself) closes; the figure and buttons do not.
   box.addEventListener("click", (event) => {
     if (event.target === box) close();
   });
@@ -193,10 +154,123 @@ function initLightbox(photos, openers) {
 }
 
 /* ============================================================================
-   ENTRY POINT
+   RENDER
    ========================================================================== */
 
 export function render() {
   if (!D || typeof document === "undefined") return;
-  // M3: masonry grid, hover captions, lightbox, and the pending state.
+
+  const sub = document.getElementById("photo-sub");
+  const gallery = document.getElementById("gallery");
+  if (!sub || !gallery) return;
+
+  const records =
+    D.photography && Array.isArray(D.photography.photos)
+      ? D.photography.photos
+      : [];
+
+  // Only photos whose publicId resolves to a real source make it to the page.
+  const resolved = records.filter(
+    (photo) =>
+      photo &&
+      typeof photo === "object" &&
+      imageSources(photo, { widths: SHOT_WIDTHS, sizes: SHOT_SIZES }) !== null
+  );
+
+  const instagram =
+    D.site && D.site.socials && typeof D.site.socials.instagram === "string"
+      ? D.site.socials.instagram
+      : "";
+  const instagramLink = extLink("page-sub-link mono", "Instagram ↗", instagram);
+
+  if (resolved.length === 0) {
+    // Pending state: one quiet line, no empty frames.
+    const wrap = el("div", "wrap");
+    wrap.append(el("p", "gallery-empty", "Photographs coming soon."));
+    gallery.append(wrap);
+    if (instagramLink) sub.append(instagramLink);
+    return;
+  }
+
+  const countSpan = el("span", "photo-count");
+  countSpan.textContent = `${resolved.length} photographs`;
+  sub.append(countSpan);
+  if (instagramLink) {
+    sub.append(document.createTextNode(" · "), instagramLink);
+  }
+
+  const wrap = el("div", "wrap");
+  const list = el("ul", "masonry");
+  const openers = new Map();
+  const lightboxPhotos = [];
+
+  // When a photograph 404s its cell hides and it leaves the lightbox, so the
+  // "<n> photographs" count must track what is actually visible, not what was
+  // resolved. Only the count span is rewritten; the Instagram link is kept.
+  const showEmpty = () => {
+    const empty = el("div", "wrap");
+    empty.append(el("p", "gallery-empty", "Photographs coming soon."));
+    gallery.replaceChildren(empty);
+    sub.replaceChildren();
+    if (instagramLink) sub.append(instagramLink);
+  };
+
+  const refreshCount = () => {
+    const visible = lightboxPhotos.filter((photo) => !photo.broken).length;
+    if (visible === 0) {
+      showEmpty();
+      return;
+    }
+    countSpan.textContent = `${visible} photographs`;
+  };
+
+  resolved.forEach((photo, index) => {
+    const caption = typeof photo.caption === "string" ? photo.caption.trim() : "";
+    const exif = typeof photo.exif === "string" ? photo.exif.trim() : "";
+
+    const sources = imageSources(photo, { widths: [2560], sizes: "92vw" });
+    const lb = { sources, caption, exif, broken: false };
+    lightboxPhotos.push(lb);
+
+    const item = el("li", "masonry-item");
+    const button = el("button", "shot");
+    button.type = "button";
+    button.setAttribute("aria-label", `Open photograph: ${caption || "Untitled"}`);
+
+    const frame = el("span", "shot-frame");
+    frame.style.setProperty("--ratio", String(cleanRatio(photo.ratio)));
+
+    const img = makeImg(photo, {
+      widths: SHOT_WIDTHS,
+      sizes: SHOT_SIZES,
+      className: "shot-img"
+    });
+
+    if (img) {
+      img.addEventListener("load", () => img.classList.add("is-loaded"));
+      if (img.complete) img.classList.add("is-loaded");
+      // A photo that fails hides its whole cell and leaves the lightbox.
+      img.addEventListener("error", () => {
+        item.hidden = true;
+        lb.broken = true;
+        refreshCount();
+      }, { once: true });
+      frame.append(img);
+    } else {
+      // resolution guaranteed a source above; still keep a quiet fallback.
+      frame.classList.add("is-imgless");
+      item.hidden = true;
+      lb.broken = true;
+    }
+
+    const cap = el("span", "shot-cap mono", caption);
+    button.append(frame, cap);
+    item.append(button);
+    list.append(item);
+    openers.set(index, button);
+  });
+
+  wrap.append(list);
+  gallery.append(wrap);
+  initLightbox(lightboxPhotos, openers);
 }
