@@ -129,3 +129,7 @@ Netlify, a custom domain, or a `sauravscode.github.io` user site; but if the
 site is published as a GitHub *project* page at
 `https://sauravscode.github.io/portfolio/`, prefix those paths in
 `404.html` with `/portfolio`.
+
+## Claude and DeepSeek workflow
+
+[Start a supervised coding task](docs/dual-agent.md) to plan with Claude, implement with Pi and DeepSeek, and test the portfolio locally.
