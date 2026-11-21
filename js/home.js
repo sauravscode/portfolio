@@ -16,6 +16,22 @@ import { D, el, safeUrl, makeImg } from "./core.js";
 const HERO_WIDTHS = [800, 1200, 1600, 2000, 2560];
 const PANEL_WIDTHS = [600, 900, 1200, 1600];
 
+/**
+ * The width the browser should actually fetch for the hero. `object-fit:
+ * cover` on a full-viewport photo means a portrait viewport renders the
+ * image at `100vh × ratio` wide, not `100vw`. When the hero records a sane
+ * ratio we tell the browser that, so phones download a sharp version instead
+ * of a 100vw one that gets upscaled ~2×.
+ */
+function heroSizes() {
+  const ratio = D && D.hero && D.hero.image ? Number(D.hero.image.ratio) : NaN;
+  if (Number.isFinite(ratio) && ratio >= 0.3 && ratio <= 5) {
+    const r1000 = Math.round(ratio * 1000);
+    return `(max-aspect-ratio: ${r1000}/1000) ${r1000 / 10}vh, 100vw`;
+  }
+  return "100vw";
+}
+
 /** A full-bleed legibility scrim; hidden from screen readers. */
 function scrim(className) {
   const layer = el("div", className);
@@ -33,7 +49,7 @@ function renderHero() {
     eager: true,
     priority: true,
     widths: HERO_WIDTHS,
-    sizes: "100vw",
+    sizes: heroSizes(),
     className: "hero-img"
   });
 

@@ -43,8 +43,13 @@ than a personal portfolio needs).
 5. Add a short `alt` saying what the photo shows.
 6. For gallery photos set `ratio` = width ÷ height (3:2 → `1.5`, 2:3 → `0.667`).
 7. For the hero, set `focus` to choose which part survives the crop — e.g.
-   `"50% 35%"`.
+   `"50% 35%"` — and `ratio` to the photo's width ÷ height (e.g. `1.895`) so
+   phones download a sharp enough version.
 8. Save, commit, push — GitHub Pages redeploys.
+
+**Social preview** — the `og:image` in the three HTML files (`index.html`,
+`photography/index.html`, `about/index.html`) is a static Cloudinary URL (a
+1200×630 crop of the hero). If you change the hero, update that URL by hand.
 
 **Why Cloudinary** — automatic AVIF/WebP and per-screen sizes, nothing heavy in
 git, and a free tier far beyond this site's traffic.

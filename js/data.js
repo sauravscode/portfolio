@@ -33,8 +33,10 @@
      • alt       — what the image shows. Required in spirit; empty is decorative.
      • focus     — optional object-position for cropped photos, "50% 35%". It
                    chooses which part of the frame stays visible.
-     • ratio     — photography only: width / height (3:2 = 1.5, 2:3 = 0.667,
-                   square = 1). Reserves space so the grid never jumps.
+     • ratio     — width / height (3:2 = 1.5, 2:3 = 0.667, square = 1).
+                   Photography: reserves space so the grid never jumps.
+                   Hero only: width ÷ height of the photo, used so phones
+                   download a sharp enough version.
      • caption   — photography only: a short line shown on hover and in the
                    lightbox.
      • exif      — photography only, optional: "24mm · f/8 · 1/60 · ISO 100".
@@ -72,9 +74,10 @@ const DATA = {
      -------------------------------------------------------------------------- */
   hero: {
     image: {
-      publicId: "DSC_0333",
-      alt: "A neoclassical facade lit red at night, its columns wrapped in spiralling white lights",
-      focus: "50% 45%"
+      publicId: "DSC_0429",
+      alt: "A car on a winding road through a highland glen beneath mountains at sunset",
+      focus: "70% 50%",
+      ratio: 1.895
     }
   },
 
@@ -107,7 +110,7 @@ const DATA = {
      ABOUT — the portrait, two short paragraphs, and the NOW line.
      -------------------------------------------------------------------------- */
   about: {
-    image: { publicId: "DSC_0429", alt: "A car on a winding road through a glen beneath mountains at sunset" },
+    image: { publicId: "DSC_0164", alt: "A turreted sandstone building on a city corner under a blue sky" },
     paragraphs: [
       "I'm a software and infrastructure engineer at Lancashire Teaching Hospitals, " +
       "where I help build and run a Kubernetes-based Trusted Research Environment — " +
@@ -142,14 +145,14 @@ const DATA = {
      -------------------------------------------------------------------------- */
   photography: {
     photos: [
-      { publicId: "DSC_0333", ratio: 1.4321, caption: "Pillars of light" },
+      { publicId: "DSC_0429", ratio: 1.895,  caption: "Road through the glen" },
       { publicId: "DSC_0588", ratio: 1.7976, caption: "Viaduct in the glen" },
+      { publicId: "DSC_0333", ratio: 1.4321, caption: "Pillars of light" },
       { publicId: "DSC_0068", ratio: 1.7986, caption: "Underpass, after rain" },
       { publicId: "DSC_0166", ratio: 1.5576, caption: "The piper" },
-      { publicId: "DSC_0429", ratio: 1.895,  caption: "Road through the glen" },
-      { publicId: "DSC_0076", ratio: 1.5002, caption: "Winter fair" },
+      { publicId: "DSC_0164", ratio: 1.5002, caption: "Corner, late light" },
       { publicId: "DSC_0679", ratio: 1.699,  caption: "Platform, steam railway" },
-      { publicId: "DSC_0164", ratio: 1.5002, caption: "Corner, late light" }
+      { publicId: "DSC_0076", ratio: 1.5002, caption: "Winter fair" }
     ]
   }
 };

@@ -251,6 +251,16 @@ em {
   color: var(--ink);
 }
 
+/* On the home hero the ivory wordmark and nav sit on a bright sky; the same
+   soft halo as the tagline keeps them legible without a visible box. */
+.site-head--overlay .wordmark,
+.site-head--overlay .nav-link {
+  text-shadow:
+    0 0 2px rgba(0, 0, 0, 0.9),
+    0 1px 3px rgba(0, 0, 0, 0.8),
+    0 2px 18px rgba(0, 0, 0, 0.85);
+}
+
 /* ============================================================================
    FOOTER
    ========================================================================== */
@@ -426,9 +436,11 @@ em {
     transform: none;
   }
 
-  /* M2: the hero photograph appears at once; panels do not zoom. */
+  /* M2: the hero photograph appears at once; no settle zoom. */
   .hero-img {
     opacity: 1;
+    animation: none;
+    transform: none;
   }
 
   .panel:hover .panel-img,
@@ -477,8 +489,21 @@ em {
   transition: opacity 1.2s ease;
 }
 
+/* One-time "settle": the photograph eases from a slight zoom to true scale as
+   it fades in. Runs once on load, never loops. The hero has overflow:hidden,
+   so the scaled image never causes a scrollbar. */
+@keyframes hero-settle {
+  from {
+    transform: scale(1.06);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
 .hero-img.is-loaded {
   opacity: 1;
+  animation: hero-settle 2.4s cubic-bezier(0.2, 0.6, 0.2, 1) both;
 }
 
 .hero-scrim {
