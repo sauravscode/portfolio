@@ -62,7 +62,7 @@ const DATA = {
      CLOUDINARY — one-time setup. Paste your cloud name between the quotes.
      -------------------------------------------------------------------------- */
   cloudinary: {
-    cloudName: "your-cloud-name"
+    cloudName: "loqdzgcd"
   },
 
   /* --------------------------------------------------------------------------
@@ -71,7 +71,11 @@ const DATA = {
      the full-screen crop.
      -------------------------------------------------------------------------- */
   hero: {
-    image: { publicId: "", alt: "", focus: "50% 50%" }
+    image: {
+      publicId: "DSC_0333",
+      alt: "A neoclassical facade lit red at night, its columns wrapped in spiralling white lights",
+      focus: "50% 45%"
+    }
   },
 
   /* --------------------------------------------------------------------------
@@ -80,22 +84,22 @@ const DATA = {
      -------------------------------------------------------------------------- */
   panels: [
     {
-      title: "Foundations",
-      caption: "The quiet infrastructure behind NHS research",
+      title: "Work",
+      caption: "Software and infrastructure engineer",
       href: "about/#work",
-      image: { publicId: "", alt: "" }
+      image: { publicId: "DSC_0068", alt: "Two people walking through a rain-wet underpass lined with relief murals" }
     },
     {
       title: "Photography",
       caption: "Landscape, architecture and light",
       href: "photography/",
-      image: { publicId: "", alt: "" }
+      image: { publicId: "DSC_0588", alt: "A curved stone viaduct crossing a wooded highland glen" }
     },
     {
       title: "Contact",
       caption: "Say hello",
       href: "about/#contact",
-      image: { publicId: "", alt: "" }
+      image: { publicId: "DSC_0166", alt: "A piper in full highland dress playing on a sandstone street" }
     }
   ],
 
@@ -103,7 +107,7 @@ const DATA = {
      ABOUT — the portrait, two short paragraphs, and the NOW line.
      -------------------------------------------------------------------------- */
   about: {
-    image: { publicId: "", alt: "" },
+    image: { publicId: "DSC_0429", alt: "A car on a winding road through a glen beneath mountains at sunset" },
     paragraphs: [
       "I'm a software and infrastructure engineer at Lancashire Teaching Hospitals, " +
       "where I help build and run a Kubernetes-based Trusted Research Environment — " +
@@ -138,17 +142,14 @@ const DATA = {
      -------------------------------------------------------------------------- */
   photography: {
     photos: [
-      { publicId: "portfolio/photo-01", ratio: 1.5,  caption: "Northern fells, first light",
-        exif: "24mm · f/8 · 1/60 · ISO 100" },
-      { publicId: "portfolio/photo-02", ratio: 0.667, caption: "Concrete and sky" },
-      { publicId: "portfolio/photo-03", ratio: 1.5,  caption: "Coast road" },
-      { publicId: "portfolio/photo-04", ratio: 1,     caption: "Stairwell geometry" },
-      { publicId: "portfolio/photo-05", ratio: 1.5,  caption: "Valley in cloud" },
-      { publicId: "portfolio/photo-06", ratio: 0.667, caption: "Glass facade" },
-      { publicId: "portfolio/photo-07", ratio: 1.5,  caption: "Harbour, low tide" },
-      { publicId: "portfolio/photo-08", ratio: 1.5,  caption: "Moorland weather" },
-      { publicId: "portfolio/photo-09", ratio: 0.667, caption: "Brutalist detail" },
-      { publicId: "portfolio/photo-10", ratio: 1.5,  caption: "The road to Leeds" }
+      { publicId: "DSC_0333", ratio: 1.4321, caption: "Pillars of light" },
+      { publicId: "DSC_0588", ratio: 1.7976, caption: "Viaduct in the glen" },
+      { publicId: "DSC_0068", ratio: 1.7986, caption: "Underpass, after rain" },
+      { publicId: "DSC_0166", ratio: 1.5576, caption: "The piper" },
+      { publicId: "DSC_0429", ratio: 1.895,  caption: "Road through the glen" },
+      { publicId: "DSC_0076", ratio: 1.5002, caption: "Winter fair" },
+      { publicId: "DSC_0679", ratio: 1.699,  caption: "Platform, steam railway" },
+      { publicId: "DSC_0164", ratio: 1.5002, caption: "Corner, late light" }
     ]
   }
 };

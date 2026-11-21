@@ -3,7 +3,7 @@
 **GALLERY** — a simple, grand, image-led portfolio. Dark as a gallery and quiet
 as a gallery: near-black ground, ivory serif type, and Saurav's own photographs
 doing the talking. Three pages — **Home** (a full-screen hero with the name set
-large, then three tall panels: Foundations, Photography, Contact),
+large, then three tall panels: Work, Photography, Contact),
 **Photography** (a masonry grid with a keyboard lightbox), and **About** (the
 story, the Clarke quote in the Work section, and contact). No cards, no badges,
 no metrics — just the photos and the fewest words.

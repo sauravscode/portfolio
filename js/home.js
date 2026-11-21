@@ -53,7 +53,9 @@ function renderHero() {
 
   const site = D.site || {};
   const content = el("div", "hero-content");
-  content.append(el("h1", "hero-name display", site.name));
+  // The name already shows in the header wordmark, so the h1 is for screen
+  // readers and search engines only.
+  content.append(el("h1", "hero-name visually-hidden", site.name));
   content.append(el("p", "hero-tagline mono", site.tagline));
   hero.append(content);
 

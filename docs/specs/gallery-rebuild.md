@@ -215,3 +215,10 @@ _(reviewer fills in)_
 - Fix round 1: README spec-link text (quoting error in the reviewer's own assignment).
 - Infra: .git moved to ~/.git-stores/portfolio.git with a pointer file (owner approved) after repeated iCloud evictions; the backup is at .git-icloud-old.
 - Not verified: 44px coarse-pointer targets (headless doesn't emulate pointer:coarse); real Cormorant/DM Mono rendering (fonts are blocked offline in the harness).
+
+### Owner change 2026-11-21
+- Hero: the visible name was removed (the header wordmark already shows it). The name stays as a visually-hidden h1 for screen readers and SEO; the tagline stands alone.
+- First panel renamed "Foundations" → "Work", caption "Software and infrastructure engineer" (still links to about/#work).
+- Photos wired 2026-11-21: cloudName `loqdzgcd`. Hero DSC_0333 (focus 50% 45%); panels Work=DSC_0068, Photography=DSC_0588, Contact=DSC_0166;
+  About=DSC_0429; gallery has all 8 with ratios read from Cloudinary `fl_getinfo`. Hero scrim strengthened and tagline/cue lowered for legibility on a
+  bright photo. All images load (0 broken), no overflow at 360/1440, console clean with real fonts, smoke PASS on all 3 routes.
