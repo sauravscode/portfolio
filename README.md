@@ -4,8 +4,10 @@
 as a gallery: near-black ground, ivory serif type, and Saurav's own photographs
 doing the talking. Three pages — **Home** (a full-screen hero with the name set
 large, then three tall panels: Work, Photography, Contact),
-**Photography** (a masonry grid with a keyboard lightbox), and **About** (the
-story, the Clarke quote in the Work section, and contact). No cards, no badges,
+**Photography** (an editorial grid — a full-width lead photo, then photos in
+pairs, captions beneath each, and a full-screen viewer with keyboard and swipe
+navigation), and **About** (the story, the Clarke quote in the Work section,
+and contact). No cards, no badges,
 no metrics — just the photos and the fewest words.
 
 ## The one rule
@@ -67,15 +69,16 @@ the plain dark ground, and the Photography page shows a single line,
 ```
 portfolio/
 ├── index.html                  # Home — hero + three panels
-├── photography/index.html      # Photography — masonry + lightbox
+├── photography/index.html      # Photography — editorial grid + viewer
 ├── about/index.html            # About — portrait, Work quote, contact
+├── 404.html                    # shown by the host for unknown URLs
 ├── css/styles.css              # the whole design system, one sectioned file
 ├── js/
 │   ├── data.js                 # ← ALL content lives here. Edit this, nothing else.
 │   ├── app.js                  # thin entry point / page router
 │   ├── core.js                 # helpers, images, header/footer, reveals
 │   ├── home.js                 # hero + panels renderer
-│   ├── photography.js          # masonry + lightbox renderer
+│   ├── photography.js          # editorial grid + viewer renderer
 │   └── about.js                # portrait + work + contact renderer
 ├── scripts/
 │   └── smoke-portfolio.py      # headless-Chrome smoke test
@@ -119,5 +122,12 @@ Static files — GitHub Pages (`main` / root) or drop the folder on Netlify. The
 CSP is enforced with a `<meta>` tag. `frame-ancestors` and other header-only
 directives cannot be set in a meta tag; configure them at the host level (a
 `_headers` file on Netlify, for example) if you want them.
+
+`404.html` uses root-absolute links (`/css/styles.css`, `/`, `/photography/`,
+`/about/`) because the host can serve it at any URL depth. That is correct for
+Netlify, a custom domain, or a `sauravscode.github.io` user site; but if the
+site is published as a GitHub *project* page at
+`https://sauravscode.github.io/portfolio/`, prefix those paths in
+`404.html` with `/portfolio`.
 
 *Spec: [`docs/specs/gallery-rebuild.md`](docs/specs/gallery-rebuild.md).*

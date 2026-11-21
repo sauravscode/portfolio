@@ -1,6 +1,6 @@
 # Spec — GALLERY refinement pass (owner: "suggest and do, no approval needed")
 
-Status: **APPROVED BY BRIEF 2026-11-21 — in progress** (the owner waived interview and approval; reviewer decisions below)
+Status: **COMPLETE 2026-11-21 — awaiting owner review and push** (the owner waived interview and approval; reviewer decisions below)
 Branch: `version2`, start HEAD `6c7afb3`. Preserve owner edits: `.claude/settings.json`, the README workflow section, `.claude/skills/`,
 `docs/dual-agent.md`, `scripts/` (pi-worker, smoke-portfolio.py). Workers: `DEEPSEEK_MODEL=deepseek-v4-pro`.
 
@@ -67,3 +67,10 @@ Owned: `404.html` (new). Criteria: RC11.
   Reduced motion: 0 transitions/animations.
 - Fix round 1: pair frames share 8:5 at ≥ 900px.
 - Note: `.gitignore` gained `/docs` at 14:50 during the R2 run (not in the worker's report). It was left untouched and unstaged for the owner to confirm.
+
+### R3 — ACCEPTED 2026-11-21
+- 404.html: CSP identical, no JS, real fonts, ground colour, root-absolute links, no overflow at 360/1440. README updated (editorial gallery wording, 404 note,
+  project-page prefix caveat); the owner's section is intact.
+- Final regression: 4 pages × 360/1440: no overflow, 0 broken images, 0 animations under reduced motion; no inline code or innerHTML; smoke PASS ×3.
+- Open: the site is not yet published (both github.io URLs return 404), so the deployment base is unknown and the 404.html prefix may need /portfolio.
+  `.gitignore` `/docs` line is left for the owner.
