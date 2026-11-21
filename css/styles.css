@@ -448,7 +448,8 @@ em {
     transform: none;
   }
 
-  /* M3: gallery photos appear at once; the hover caption snaps instead of fading. */
+  /* M3: gallery photos appear at once; no hover zoom (see the no-preference
+     query in the PHOTOGRAPHY section). */
   .shot-img {
     opacity: 1;
   }
@@ -681,7 +682,7 @@ em {
 }
 
 /* ============================================================================
-   PHOTOGRAPHY — masonry grid (M3)
+   PHOTOGRAPHY — editorial grid (M3)
    ========================================================================== */
 
 /* The count + Instagram line under the page title. */
@@ -702,35 +703,37 @@ em {
   padding-block: clamp(4rem, 14vh, 8rem);
 }
 
-/* CSS-column masonry: 1 col < 640, 2 cols 640–1099, 3 cols ≥ 1100. */
-.masonry {
-  column-count: 1;
-  column-gap: clamp(16px, 2.4vw, 32px);
+/* Editorial grid: 1 col under 900px, 2 cols at 900px and up; a trailing odd
+   photo spans the full row so the grid never ends ragged. */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  column-gap: clamp(20px, 3vw, 40px);
+  row-gap: clamp(20px, 3vw, 40px);
+  align-items: start;
 }
 
-.masonry-item {
-  break-inside: avoid;
-  margin-bottom: clamp(16px, 2.4vw, 32px);
-}
+@media (min-width: 900px) {
+  .gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 
-@media (min-width: 640px) {
-  .masonry {
-    column-count: 2;
+  /* Pair up photos at a shared shape so frames and captions in a row align.
+     Feature items keep their natural --ratio. */
+  .gallery-item:not(.gallery-item--feature) .shot-frame {
+    aspect-ratio: 8 / 5;
   }
 }
 
-@media (min-width: 1100px) {
-  .masonry {
-    column-count: 3;
-  }
+.gallery-item--feature {
+  grid-column: 1 / -1;
 }
 
-/* Each photograph is a button that opens the lightbox. */
+/* Each photograph is a button that opens the lightbox: the image frame first,
+   the always-visible caption below it. */
 .shot {
-  position: relative;
   display: block;
   width: 100%;
-  overflow: hidden;
   text-align: left;
 }
 
@@ -748,39 +751,30 @@ em {
   height: 100%;
   object-fit: cover;
   opacity: 0;
-  transition: opacity 600ms var(--ease);
+  transition: opacity 600ms var(--ease), transform 0.8s var(--ease);
 }
 
 .shot-img.is-loaded {
   opacity: 1;
 }
 
-/* Caption: tiny mono line on a small scrim, shown on hover/focus. On touch
-   devices (no hover) it is always visible. */
+/* Subtle hover/focus zoom on the image only, clipped by the frame's overflow.
+   Disabled entirely under reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .shot:hover .shot-img,
+  .shot:focus-visible .shot-img {
+    transform: scale(1.02);
+  }
+}
+
+/* Caption: quiet mono line, always visible below the frame. */
 .shot-cap {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1;
-  padding: 2rem 1rem 0.75rem;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
-  color: var(--ink);
+  display: block;
+  margin-top: 12px;
+  color: var(--muted);
   font-size: 11px;
   letter-spacing: 0.2em;
-  opacity: 0;
-  transition: opacity 400ms ease;
-}
-
-.shot:hover .shot-cap,
-.shot:focus-visible .shot-cap {
   opacity: 1;
-}
-
-@media (hover: none) {
-  .shot-cap {
-    opacity: 1;
-  }
 }
 
 /* ============================================================================
@@ -833,6 +827,13 @@ html.is-locked {
 #lb-img.is-loading {
   opacity: 0;
   transition: none;
+}
+
+/* Horizontal swipes drive prev/next, so let the browser keep only vertical
+   panning on the figure and image. (The page is scroll-locked anyway.) */
+.lb-figure,
+#lb-img {
+  touch-action: pan-y;
 }
 
 /* A quiet "Loading" in the centre of the reserved frame. */

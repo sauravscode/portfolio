@@ -59,3 +59,11 @@ Owned: `404.html` (new). Criteria: RC11.
   Settle animation hero-settle 2.4s ×1; reduced motion → none/none, 0 animations. Overlay header halo on; about header none. About = DSC_0164 (4:5 c_fill).
   og/twitter meta + Cloudinary preconnect on all 3 pages, CSP unchanged; og:image returns 200 image/jpeg 1200×630. Gallery reordered. README notes
   added; the owner's section is byte-identical (kept out of the commit).
+
+### R2 — ACCEPTED 2026-11-21
+- Editorial grid at 1440: F(1104) + 3 aligned pairs (532 each, shared 8:5 frames, equal tops) + trailing F. At 390: single column with natural ratios.
+  Every image fetches ≥ its displayed width. Captions are always visible below the frame. With a broken last photo the layout becomes FppppppH and the count
+  shows "7 photographs". Swipe: left → next, right → prev; vertical, < 50px, mouse, and button-origin drags are ignored; keys and buttons unchanged; touch-action pan-y.
+  Reduced motion: 0 transitions/animations.
+- Fix round 1: pair frames share 8:5 at ≥ 900px.
+- Note: `.gitignore` gained `/docs` at 14:50 during the R2 run (not in the worker's report). It was left untouched and unstaged for the owner to confirm.

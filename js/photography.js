@@ -3,8 +3,9 @@
 
    The Cloudinary helpers once private to this module now live in core.js
    (imageSources / makeImg), so the whole site shares one image path. What
-   remains here is the page itself: resolve the photos, render the masonry
-   grid with hover captions, and adapt the accepted focus-trapped lightbox
+   remains here is the page itself: resolve the photos, render the editorial
+   grid with always-visible captions, and adapt the accepted focus-trapped
+   lightbox
    (Esc, ← →, Tab trap, focus restore, scroll lock) to the grid buttons.
 
    Rules: no HTML parsing; all text goes through textContent; URLs through
@@ -14,9 +15,14 @@
 
 import { D, el, extLink, imageSources, makeImg } from "./core.js";
 
-const SHOT_WIDTHS = [480, 800, 1200, 1600];
-const SHOT_SIZES =
-  "(min-width: 1100px) 31vw, (min-width: 640px) 46vw, 92vw";
+// Editorial grid image sizing. A feature (full-width) photo can reach the
+// .wrap content width — 1200px minus two 48px gutters = 1104px — so its
+// srcset tops out at 2560w for sharp high-DPI displays. Paired photos share a
+// row and stop at 1600w.
+const FEATURE_WIDTHS = [800, 1200, 1600, 2000, 2560];
+const FEATURE_SIZES = "(min-width: 1200px) 1104px, 92vw";
+const PAIR_WIDTHS = [600, 900, 1200, 1600];
+const PAIR_SIZES = "(min-width: 900px) 46vw, 92vw";
 
 /** A safe aspect ratio for the frame: finite, within 0.2–5, else 1.5. */
 function cleanRatio(value) {
@@ -142,6 +148,30 @@ function initLightbox(photos, openers) {
     if (event.target === box) close();
   });
 
+  // Swipe navigation (touch/pen): a mostly-horizontal swipe of at least 50px
+  // steps prev/next. Vertical scroll gestures are ignored, and swipes that
+  // start on a button stay with that button's click.
+  let swipeStart = null;
+  box.addEventListener("pointerdown", (event) => {
+    if (event.pointerType !== "touch" && event.pointerType !== "pen") return;
+    if (event.target instanceof Element && event.target.closest("button")) return;
+    swipeStart = { x: event.clientX, y: event.clientY };
+  });
+  box.addEventListener("pointerup", (event) => {
+    if (!swipeStart) return;
+    if (event.pointerType !== "touch" && event.pointerType !== "pen") return;
+    const start = swipeStart;
+    swipeStart = null;
+    const dx = event.clientX - start.x;
+    const dy = event.clientY - start.y;
+    if (Math.abs(dx) < 50 || Math.abs(dx) <= 1.5 * Math.abs(dy)) return;
+    if (dx < 0) show(current + 1);
+    else show(current - 1);
+  });
+  box.addEventListener("pointercancel", () => {
+    swipeStart = null;
+  });
+
   document.addEventListener("keydown", (event) => {
     if (box.hidden) return;
 
@@ -206,7 +236,7 @@ export function render() {
     (photo) =>
       photo &&
       typeof photo === "object" &&
-      imageSources(photo, { widths: SHOT_WIDTHS, sizes: SHOT_SIZES }) !== null
+      imageSources(photo, { widths: FEATURE_WIDTHS, sizes: FEATURE_SIZES }) !== null
   );
 
   const instagram =
@@ -232,9 +262,10 @@ export function render() {
   }
 
   const wrap = el("div", "wrap");
-  const list = el("ul", "masonry");
+  const list = el("ul", "gallery-grid");
   const openers = new Map();
   const lightboxPhotos = [];
+  const shotMeta = []; // { item, img, featureSources, pairSources }
 
   // When a photograph 404s its cell hides and it leaves the lightbox, so the
   // "<n> photographs" count must track what is actually visible, not what was
@@ -256,6 +287,37 @@ export function render() {
     countSpan.textContent = `${visible} photographs`;
   };
 
+  /** Point a shot <img> at a sources object (feature or pair). */
+  function applyShotSources(img, sources) {
+    if (sources.srcset) {
+      img.sizes = sources.sizes || "92vw";
+      img.srcset = sources.srcset;
+    } else {
+      img.removeAttribute("srcset");
+      img.removeAttribute("sizes");
+    }
+    img.src = sources.src;
+  }
+
+  // Feature/pair assignment: the first visible photo spans both columns and
+  // the rest pair up. When the rest is odd, the last visible photo also spans
+  // both columns so the grid never ends ragged. Runs after render and again
+  // whenever a broken photo hides its cell.
+  function relayout() {
+    const visible = shotMeta.filter(({ item }) => !item.hidden);
+    for (const meta of shotMeta) meta.item.classList.remove("gallery-item--feature");
+    if (!visible.length) return;
+
+    const lastIsFeature = (visible.length - 1) % 2 === 1;
+    visible.forEach((meta, i) => {
+      const feature = i === 0 || (lastIsFeature && i === visible.length - 1);
+      meta.item.classList.toggle("gallery-item--feature", feature);
+      if (meta.img) {
+        applyShotSources(meta.img, feature ? meta.featureSources : meta.pairSources);
+      }
+    });
+  }
+
   resolved.forEach((photo, index) => {
     const caption = typeof photo.caption === "string" ? photo.caption.trim() : "";
     const exif = typeof photo.exif === "string" ? photo.exif.trim() : "";
@@ -269,7 +331,19 @@ export function render() {
     const lb = { sources, caption, exif, ratio: cleanRatio(photo.ratio), broken: false };
     lightboxPhotos.push(lb);
 
-    const item = el("li", "masonry-item");
+    // The same photo may render full-width (feature) or half-width (pair)
+    // depending on where it sits once broken images are hidden, so keep both
+    // source sets and let relayout() choose.
+    const featureSources = imageSources(photo, {
+      widths: FEATURE_WIDTHS,
+      sizes: FEATURE_SIZES
+    });
+    const pairSources = imageSources(photo, {
+      widths: PAIR_WIDTHS,
+      sizes: PAIR_SIZES
+    });
+
+    const item = el("li", "gallery-item");
     const button = el("button", "shot");
     button.type = "button";
     button.setAttribute("aria-label", `Open photograph: ${caption || "Untitled"}`);
@@ -277,9 +351,14 @@ export function render() {
     const frame = el("span", "shot-frame");
     frame.style.setProperty("--ratio", String(cleanRatio(photo.ratio)));
 
+    // At render time nothing is hidden yet, so the feature/pair role is just
+    // the first photo plus (when the rest is odd) the last photo. relayout()
+    // re-derives this after any broken image is hidden.
+    const initialFeature =
+      index === 0 || ((resolved.length - 1) % 2 === 1 && index === resolved.length - 1);
     const img = makeImg(photo, {
-      widths: SHOT_WIDTHS,
-      sizes: SHOT_SIZES,
+      widths: initialFeature ? FEATURE_WIDTHS : PAIR_WIDTHS,
+      sizes: initialFeature ? FEATURE_SIZES : PAIR_SIZES,
       className: "shot-img"
     });
 
@@ -291,13 +370,16 @@ export function render() {
         item.hidden = true;
         lb.broken = true;
         refreshCount();
+        relayout();
       }, { once: true });
       frame.append(img);
+      shotMeta.push({ item, img, featureSources, pairSources });
     } else {
       // resolution guaranteed a source above; still keep a quiet fallback.
       frame.classList.add("is-imgless");
       item.hidden = true;
       lb.broken = true;
+      shotMeta.push({ item, img: null, featureSources, pairSources });
     }
 
     const cap = el("span", "shot-cap mono", caption);
@@ -309,5 +391,6 @@ export function render() {
 
   wrap.append(list);
   gallery.append(wrap);
+  relayout();
   initLightbox(lightboxPhotos, openers);
 }
