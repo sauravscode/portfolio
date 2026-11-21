@@ -129,5 +129,3 @@ Netlify, a custom domain, or a `sauravscode.github.io` user site; but if the
 site is published as a GitHub *project* page at
 `https://sauravscode.github.io/portfolio/`, prefix those paths in
 `404.html` with `/portfolio`.
-
-*Spec: [`docs/specs/gallery-rebuild.md`](docs/specs/gallery-rebuild.md).*

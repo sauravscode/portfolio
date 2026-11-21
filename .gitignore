@@ -1,3 +1,5 @@
-.superpowers/
-.claude/settings.local.json
 .DS_Store
+.superpowers/
+.claude/
+.git-icloud-old/
+/docs/
