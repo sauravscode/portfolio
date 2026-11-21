@@ -488,7 +488,7 @@ em {
   pointer-events: none;
   background:
     linear-gradient(to bottom, rgba(0, 0, 0, 0.45), transparent 22%),
-    linear-gradient(to top, rgba(0, 0, 0, 0.82) 0%, rgba(0, 0, 0, 0.55) 18%, rgba(0, 0, 0, 0.12) 42%, transparent 60%);
+    linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.7) 14%, rgba(0, 0, 0, 0.25) 34%, transparent 55%);
 }
 
 .hero-content {
@@ -509,12 +509,22 @@ em {
   color: var(--ink);
 }
 
+/* Text over a photograph: a soft dark halo keeps the small caps legible over
+   any part of any image (bright lights included), without a visible box. */
+.hero-tagline,
+.hero-cue {
+  text-shadow:
+    0 0 2px rgba(0, 0, 0, 0.9),
+    0 1px 3px rgba(0, 0, 0, 0.8),
+    0 2px 18px rgba(0, 0, 0, 0.85);
+}
+
 .hero-tagline {
   margin-top: 0;
-  font-size: 0.75rem;
+  font-size: clamp(0.8125rem, 1vw, 0.9375rem);
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--ink);
+  color: #fff;
 }
 
 .hero-cue {
@@ -525,18 +535,19 @@ em {
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
-  font-size: 0.6875rem;
+  font-size: clamp(0.75rem, 0.9vw, 0.8125rem);
   letter-spacing: 0.24em;
   text-transform: uppercase;
   text-decoration: none;
-  color: var(--ink);
+  color: #fff;
 }
 
 .hero-cue::after {
   content: "";
   width: 1px;
   height: 48px;
-  background: var(--ink);
+  background: #fff;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.9);
 }
 
 /* ---- panels ---------------------------------------------------------------- */
@@ -777,12 +788,40 @@ html.is-locked {
   margin: 0;
 }
 
+.lb-figure {
+  position: relative;
+}
+
+/* The frame keeps the photo's shape while it loads (--lb-ratio is set from
+   data), so switching photos never collapses or jumps the layout. */
 #lb-img {
+  aspect-ratio: var(--lb-ratio, 1.5);
+  width: min(92vw, calc(82vh * var(--lb-ratio, 1.5)));
+  height: auto;
   max-width: 92vw;
   max-height: 82vh;
-  width: auto;
-  height: auto;
   object-fit: contain;
+  opacity: 1;
+  transition: opacity 0.35s ease;
+}
+
+#lb-img.is-loading {
+  opacity: 0;
+  transition: none;
+}
+
+/* A quiet "Loading" in the centre of the reserved frame. */
+.lightbox.is-loading .lb-figure::before {
+  content: "Loading";
+  position: absolute;
+  top: calc(50% - 1.5rem);
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
 .lb-cap {

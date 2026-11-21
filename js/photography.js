@@ -47,6 +47,19 @@ function initLightbox(photos, openers) {
 
   let current = 0;
   let returnFocus = null;
+  let loadToken = 0;
+
+  /** Point an <img> at a record's sources (responsive when Cloudinary-backed). */
+  function setSources(target, sources) {
+    if (sources.srcset) {
+      target.sizes = sources.sizes || "92vw";
+      target.srcset = sources.srcset;
+    } else {
+      target.removeAttribute("srcset");
+      target.removeAttribute("sizes");
+    }
+    target.src = sources.src;
+  }
 
   const viewable = () => photos
     .map((photo, index) => ({ photo, index }))
@@ -67,11 +80,28 @@ function initLightbox(photos, openers) {
     const { photo } = list[pos];
     const caption = photo.caption || "Untitled";
 
-    // The largest source the record can offer (passthrough URLs come back as-is).
-    img.src = photo.sources.src;
-    img.removeAttribute("srcset");
-    img.removeAttribute("sizes");
+    // Hide the previous photo at once: browsers keep painting the old image
+    // until the new one has downloaded, which made navigation look stuck.
+    const token = ++loadToken;
+    img.classList.add("is-loading");
+    box.classList.add("is-loading");
+    img.style.setProperty("--lb-ratio", String(photo.ratio));
+    const reveal = () => {
+      if (token !== loadToken) return; // a newer photo was requested meanwhile
+      img.classList.remove("is-loading");
+      box.classList.remove("is-loading");
+    };
+    img.onload = reveal;
+    img.onerror = reveal;
+    setSources(img, photo.sources);
     img.alt = caption;
+    if (img.complete && img.naturalWidth) reveal();
+
+    // Warm the neighbours so the next arrow press is instant.
+    for (const step of [1, -1]) {
+      const near = list[(pos + step + list.length) % list.length];
+      if (near && near !== list[pos]) setSources(new Image(), near.photo.sources);
+    }
     const capText = el("span", "lb-cap-text");
     capText.textContent = `${caption}${photo.exif ? " · " + photo.exif : ""}`;
     const count = el("span", "lb-count");
@@ -93,6 +123,8 @@ function initLightbox(photos, openers) {
   function close() {
     if (box.hidden) return;
     box.hidden = true;
+    loadToken += 1;
+    box.classList.remove("is-loading");
     document.documentElement.classList.remove("is-locked");
     img.removeAttribute("src");
     img.removeAttribute("srcset");
@@ -228,8 +260,13 @@ export function render() {
     const caption = typeof photo.caption === "string" ? photo.caption.trim() : "";
     const exif = typeof photo.exif === "string" ? photo.exif.trim() : "";
 
-    const sources = imageSources(photo, { widths: [2560], sizes: "92vw" });
-    const lb = { sources, caption, exif, broken: false };
+    // Responsive lightbox sources: the browser picks the width the screen
+    // needs instead of always downloading the 2560px version.
+    const sources = imageSources(photo, {
+      widths: [960, 1440, 1920, 2560],
+      sizes: "92vw"
+    });
+    const lb = { sources, caption, exif, ratio: cleanRatio(photo.ratio), broken: false };
     lightboxPhotos.push(lb);
 
     const item = el("li", "masonry-item");
