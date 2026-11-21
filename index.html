@@ -1,186 +1,57 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-  <title>Saurav Sudhar — Software · Infrastructure Engineer</title>
-  <meta name="description" content="Saurav Sudhar builds Kubernetes infrastructure for NHS Trusted Research Environments, and photographs the structure of light. Portfolio, selected work, and reading." />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://res.cloudinary.com; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'" />
+
+  <title>Saurav Sudhar — Engineer · Photographer</title>
+  <meta name="description" content="Saurav Sudhar — software and infrastructure engineer in Leeds, and photographer of landscape, architecture and light." />
   <meta name="author" content="Saurav Sudhar" />
-  <meta name="theme-color" content="#f5f2ec" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#0B0B0A" />
 
-  <!-- Open Graph -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Saurav Sudhar — Software · Infrastructure Engineer" />
-  <meta property="og:description" content="Kubernetes infrastructure for NHS research, and the structure of light." />
+  <meta property="og:title" content="Saurav Sudhar — Engineer · Photographer" />
+  <meta property="og:description" content="Landscape, architecture and light, photographed by Saurav Sudhar." />
+  <meta property="og:image" content="https://res.cloudinary.com/loqdzgcd/image/upload/f_jpg,q_auto,c_fill,g_auto,w_1200,h_630/DSC_0429" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="A car on a winding road through a highland glen beneath mountains at sunset" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Saurav Sudhar — Engineer · Photographer" />
+  <meta name="twitter:description" content="Landscape, architecture and light, photographed by Saurav Sudhar." />
 
-  <!-- Fonts: preconnect early, swap so text paints instantly on the fallback.
-       Fraunces (display serif) is the LCP face; Inter (UI) and JetBrains Mono
-       (metadata) load alongside it. -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20fill='%230B0B0A'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='7'%20fill='%23ECE6DA'/%3E%3C/svg%3E" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" />
-
+  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&amp;family=DM+Mono:wght@400&amp;display=swap" />
   <link rel="stylesheet" href="css/styles.css" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' font-family='Georgia,serif'>S</text></svg>" />
 
-  <!-- data.js is small and same-origin; load it in the head so content is
-       ready the moment the DOM is parsed. -->
   <script src="js/data.js"></script>
+  <script type="module" src="js/app.js"></script>
 </head>
 
-<body>
-  <!-- Grain + custom cursor live above everything but ignore pointer events -->
-  <div class="grain" aria-hidden="true"></div>
-  <div class="cursor" id="cursor" aria-hidden="true"><span class="cursor__label"></span></div>
+<body data-page="home">
+  <noscript>
+    <p class="noscript">This site renders its content with JavaScript. Reach me at
+      <a href="mailto:sauravsnair99@gmail.com">sauravsnair99@gmail.com</a> or
+      <a href="https://github.com/sauravscode" rel="noopener noreferrer">github.com/sauravscode</a>.</p>
+  </noscript>
 
-  <a class="skip-link" href="#work">Skip to work</a>
+  <a class="skip-link" href="#main">Skip to content</a>
 
-  <!-- The "spine": ambient section index + scroll progress (decorative) -->
-  <aside class="spine" aria-hidden="true">
-    <span class="spine__num" id="spine-num">00</span>
-    <span class="spine__rule"><span class="spine__fill" id="spine-fill"></span></span>
-    <span class="spine__label" id="spine-label">Index</span>
-  </aside>
+  <header class="site-head" id="site-head"></header>
 
-  <!-- ===================== MASTHEAD ===================== -->
-  <header class="masthead" id="masthead">
-    <a class="masthead__brand" href="#top" aria-label="Saurav Sudhar — home">
-      <span class="masthead__name" id="brand-name">Saurav Sudhar</span>
-      <span class="masthead__role mono" id="brand-role">Software · Infrastructure Engineer</span>
-    </a>
-
-    <nav class="nav" id="primary-nav" aria-label="Primary">
-      <a href="#work" data-nav>Work</a>
-      <a href="#about" data-nav>About</a>
-      <a href="#photography" data-nav>Photography</a>
-      <a href="#reading" data-nav>Reading</a>
-      <a href="#connect" data-nav>Connect</a>
-    </nav>
-
-    <div class="masthead__aside">
-      <span class="status mono" id="status" title="Live local time">
-        <span class="status__dot" aria-hidden="true"></span>
-        <span id="status-text">reconciling…</span>
-      </span>
-      <button class="theme-toggle" id="theme-toggle" type="button"
-              aria-label="Toggle colour theme">
-        <span class="theme-toggle__track"><span class="theme-toggle__knob"></span></span>
-      </button>
-      <button class="menu-toggle" id="menu-toggle" type="button"
-              aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
-        <span></span><span></span>
-      </button>
-    </div>
-  </header>
-
-  <main id="top">
-
-    <!-- ===================== §00 — HERO ===================== -->
-    <section class="hero section" id="hero" data-index="00" data-label="Index">
-      <div class="hero__inner">
-        <p class="hero__eyebrow mono reveal" id="hero-eyebrow"></p>
-        <h1 class="hero__headline" id="hero-headline"></h1>
-        <p class="hero__deck reveal" id="hero-deck"></p>
-        <div class="hero__meta mono reveal" id="hero-meta"></div>
-      </div>
-      <a class="hero__scroll mono" href="#work" aria-label="Scroll to work">
-        <span>Scroll</span>
-        <span class="hero__scroll-line" aria-hidden="true"></span>
-      </a>
-    </section>
-
-    <!-- ===================== §01 — WORK ===================== -->
-    <section class="section work" id="work" data-index="01" data-label="Work">
-      <div class="section__head">
-        <span class="section__num mono">§01</span>
-        <h2 class="section__title reveal">Selected Work</h2>
-        <p class="section__sub mono reveal">Infrastructure, tools, and research systems</p>
-      </div>
-      <div id="work-featured"></div>
-      <ol class="work__list" id="work-list"></ol>
-    </section>
-
-    <!-- ===================== §02 — ABOUT ===================== -->
-    <section class="section about" id="about" data-index="02" data-label="About">
-      <div class="section__head">
-        <span class="section__num mono">§02</span>
-        <h2 class="section__title reveal">Profile</h2>
-        <p class="section__sub mono reveal">Who is keeping the lights on</p>
-      </div>
-      <div class="about__grid">
-        <div class="about__body" id="about-body"></div>
-        <aside class="about__notes" aria-label="Field notes">
-          <span class="about__notes-head mono">Field log</span>
-          <dl id="about-notes"></dl>
-        </aside>
-      </div>
-    </section>
-
-    <!-- ===================== §03 — PHOTOGRAPHY ===================== -->
-    <section class="section photo" id="photography" data-index="03" data-label="Photography">
-      <div class="section__head">
-        <span class="section__num mono">§03</span>
-        <h2 class="section__title reveal">Photography</h2>
-        <p class="section__sub mono reveal" id="photo-sub">Landscape · architecture · travel</p>
-      </div>
-      <div class="gallery" id="gallery"></div>
-      <a class="photo__more mono" id="photo-instagram" href="#" target="_blank" rel="noopener">
-        More on Instagram <span aria-hidden="true">→</span>
-      </a>
-    </section>
-
-    <!-- ===================== §04 — READING ===================== -->
-    <section class="section reading" id="reading" data-index="04" data-label="Reading">
-      <div class="section__head">
-        <span class="section__num mono">§04</span>
-        <h2 class="section__title reveal">Reading</h2>
-        <p class="section__sub mono reveal">A shelf, not a table</p>
-      </div>
-      <div class="reading__grid">
-        <div class="reading__col">
-          <span class="reading__shelf-label mono">Currently reading</span>
-          <ul class="shelf" id="shelf-current"></ul>
-        </div>
-        <div class="reading__col">
-          <span class="reading__shelf-label mono">Finished</span>
-          <ul class="shelf" id="shelf-finished"></ul>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===================== §05 — CONNECT ===================== -->
-    <section class="section connect" id="connect" data-index="05" data-label="Connect">
-      <div class="connect__inner">
-        <span class="section__num mono">§05</span>
-        <h2 class="connect__title" id="connect-title">Let's build something that stays up.</h2>
-        <div class="connect__links" id="connect-links"></div>
-      </div>
-    </section>
+  <main id="main" tabindex="-1">
+    <section class="hero" id="hero"></section>
+    <section class="panels" id="panels" aria-label="Explore"></section>
   </main>
 
-  <!-- ===================== COLOPHON ===================== -->
-  <footer class="colophon">
-    <div class="colophon__row mono">
-      <span id="colophon-name"></span>
-      <span id="colophon-coords"></span>
-      <span>Vanilla HTML · CSS · JS — no framework</span>
-      <span id="colophon-year"></span>
-    </div>
-  </footer>
-
-  <!-- ===================== LIGHTBOX ===================== -->
-  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true"
-       aria-label="Photograph viewer" hidden>
-    <button class="lightbox__close" id="lb-close" aria-label="Close">Close ✕</button>
-    <button class="lightbox__nav lightbox__nav--prev" id="lb-prev" aria-label="Previous">‹</button>
-    <figure class="lightbox__figure">
-      <img id="lb-img" alt="" />
-      <figcaption class="lightbox__cap mono" id="lb-cap"></figcaption>
-    </figure>
-    <button class="lightbox__nav lightbox__nav--next" id="lb-next" aria-label="Next">›</button>
-  </div>
-
-  <script src="js/app.js" defer></script>
+  <footer class="site-foot" id="site-foot"></footer>
 </body>
 </html>

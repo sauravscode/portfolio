@@ -1,161 +1,135 @@
 # Saurav Sudhar — Portfolio
 
-A personal portfolio with an editorial, archival aesthetic — *"Specimen / Manifest."*
-Warm paper-and-ink, a characterful serif (Fraunces) for warmth, tracked monospace
-(JetBrains Mono) for the infrastructure texture, and one restrained ember accent.
+**GALLERY** — a simple, grand, image-led portfolio. Dark as a gallery and quiet
+as a gallery: near-black ground, ivory serif type, and Saurav's own photographs
+doing the talking. Three pages — **Home** (a full-screen hero with the name set
+large, then three tall panels: Work, Photography, Contact),
+**Photography** (an editorial grid — a full-width lead photo, then photos in
+pairs, captions beneath each, and a full-screen viewer with keyboard and swipe
+navigation), and **About** (the story, the Clarke quote in the Work section,
+and contact). No cards, no badges,
+no metrics — just the photos and the fewest words.
 
-Built with **vanilla HTML, CSS, and JavaScript — no framework, no build step.**
-Open `index.html` and it runs. The whole thing is a handful of static files, which
-is the right tool for a portfolio: sub-second LCP, nothing to hydrate, full control
-over every pixel of craft.
+## The one rule
 
-```
-portfolio/
-├── index.html          # semantic structure (shells that JS fills from data.js)
-├── css/styles.css      # the entire design system, one organised file
-├── js/
-│   ├── data.js         # ← ALL your content lives here. Edit this, nothing else.
-│   └── app.js          # rendering + interactions (no need to touch this)
-└── README.md
-```
+**Edit [`js/data.js`](js/data.js) only.** Every page reads from the `DATA`
+object in that one file and renders itself. The name, tagline, email, socials,
+the hero photo, the three panels, the About text, the Clarke quote, and every
+gallery photograph live there, each with a comment. Change nothing else.
 
----
+## Adding your photos (Cloudinary)
 
-## ✦ The one rule
-
-**To change any content, edit [`js/data.js`](js/data.js) only.** Never touch the
-HTML, CSS, or `app.js`. The layout reads from the `DATA` object and renders itself.
-Every section is commented in that file.
-
----
-
-## Running locally
-
-No build, no dependencies. Either:
-
-- **Just open it** — double-click `index.html`. (Photos load from Cloudinary over
-  the network, so they need an internet connection.)
-- **Or serve it** (nicer for development):
-
-  ```bash
-  python3 -m http.server 8000
-  # then visit http://localhost:8000
-  ```
-
----
-
-## Photography — adding & removing photos (Cloudinary)
-
-The gallery is driven by [Cloudinary](https://cloudinary.com)'s free tier. You never
-write an image transform by hand — the site builds optimised, responsive URLs
-(`f_auto`, `q_auto`, a blurred low-quality placeholder, and `srcset`) for you.
+Photos are served by [Cloudinary](https://cloudinary.com) — never committed to
+this repo. You upload the original once, and Cloudinary makes the responsive
+AVIF/WebP versions at every screen size, for free (the free tier is far more
+than a personal portfolio needs).
 
 **One-time setup**
 
-1. Create a free Cloudinary account.
-2. On the **Dashboard** (top-left) copy your **Cloud name**.
-3. In `js/data.js`, set it:
+1. Create a free account at [cloudinary.com](https://cloudinary.com).
+2. Open the **Dashboard** and copy your **Cloud name**.
+3. Paste it into `cloudinary.cloudName` in `js/data.js`.
 
-   ```js
-   photography: {
-     cloudName: "your-cloud-name",   // ← paste it here
-     ...
-   }
-   ```
+**Per photo**
 
-**Adding a photo**
+1. Open **Media Library** and upload the original — **2000–3000px on the long
+   edge, JPEG, sRGB**. Don't pre-resize; Cloudinary does that for you.
+2. Optionally put it in a `portfolio` folder to keep names tidy.
+3. Click the asset and copy its **Public ID** — e.g. `portfolio/derwent-dawn`
+   (the folder is part of the ID).
+4. Paste that string into the right `publicId`:
+   - `hero.image` — the full-screen opening photo;
+   - `panels[i].image` — one of the three home panels;
+   - `about.image` — the About portrait;
+   - `photography.photos[]` — a gallery entry.
+5. Add a short `alt` saying what the photo shows.
+6. For gallery photos set `ratio` = width ÷ height (3:2 → `1.5`, 2:3 → `0.667`).
+7. For the hero, set `focus` to choose which part survives the crop — e.g.
+   `"50% 35%"` — and `ratio` to the photo's width ÷ height (e.g. `1.895`) so
+   phones download a sharp enough version.
+8. Save, commit, push — GitHub Pages redeploys.
 
-1. Upload the image in Cloudinary (Media Library). Put your photos in a folder, e.g.
-   `portfolio/`.
-2. Copy the photo's **Public ID** (it includes the folder, e.g. `portfolio/derwent-water`).
-3. Add an entry to the `photos` array:
+**Social preview** — the `og:image` in the three HTML files (`index.html`,
+`photography/index.html`, `about/index.html`) is a static Cloudinary URL (a
+1200×630 crop of the hero). If you change the hero, update that URL by hand.
 
-   ```js
-   { publicId: "portfolio/derwent-water", ratio: 1.5, caption: "Derwent Water, dawn" },
-   ```
+**Why Cloudinary** — automatic AVIF/WebP and per-screen sizes, nothing heavy in
+git, and a free tier far beyond this site's traffic.
 
-   - **`ratio`** is `width ÷ height`. It reserves the right space so the page never
-     jumps while images load. Common values:
-     - Landscape 3:2 → `1.5`
-     - Portrait 2:3 → `0.667`
-     - Square → `1`
-   - **`caption`** is optional; it shows on hover and in the lightbox.
+**Escape hatch** — a `publicId` may also be a full `https://` image URL, or a
+committed root-relative path like `/images/derwent.jpg`. Those are used exactly
+as written.
 
-**Removing a photo** — delete its line from the `photos` array. Show up to ~10 for
-the best composition.
+**Before you add photos** the site stays calm: the hero and panels fall back to
+the plain dark ground, and the Photography page shows a single line,
+"Photographs coming soon." No broken-image icons, ever.
 
-> **No Cloudinary yet?** You can drop a full image URL straight into `publicId`
-> (anything starting with `http`) and it's used as-is — so you can wire up the
-> content first and switch to Cloudinary later.
+## Files
 
-Also set your Instagram link in the same `photography` block.
+```
+portfolio/
+├── index.html                  # Home — hero + three panels
+├── photography/index.html      # Photography — editorial grid + viewer
+├── about/index.html            # About — portrait, Work quote, contact
+├── 404.html                    # shown by the host for unknown URLs
+├── css/styles.css              # the whole design system, one sectioned file
+├── js/
+│   ├── data.js                 # ← ALL content lives here. Edit this, nothing else.
+│   ├── app.js                  # thin entry point / page router
+│   ├── core.js                 # helpers, images, header/footer, reveals
+│   ├── home.js                 # hero + panels renderer
+│   ├── photography.js          # editorial grid + viewer renderer
+│   └── about.js                # portrait + work + contact renderer
+├── scripts/
+│   └── smoke-portfolio.py      # headless-Chrome smoke test
+└── README.md
+```
 
----
+## Running locally
 
-## Updating projects, about, reading, and links
+```bash
+python3 -m http.server 8000 --bind 127.0.0.1
+# → http://127.0.0.1:8000
+```
 
-All in `js/data.js`:
+## Testing
 
-| What | Where | Notes |
-|------|-------|-------|
-| Hero headline & deck | `hero` | Wrap a phrase in `{{ }}` to colour it with the accent. |
-| Projects | `work[]` | The entry with `featured: true` is rendered large as the centrepiece. `manifest` is the small spec-sheet; `stack` are the tech tags; `links` are the buttons. |
-| About copy | `about.paragraphs[]` | Each string is one paragraph. |
-| "Field log" margin notes | `about.notes[]` | `{ k: "label", v: "value" }`. |
-| Reading shelves | `reading.current[]`, `reading.finished[]` | `note` is optional. |
-| Name / role / socials / email | `site` | Used across the masthead, connect, and footer. |
-| Live status location & timezone | `site.timezone`, `site.locationLabel` | Any IANA timezone string. |
+```bash
+python3 scripts/smoke-portfolio.py
+```
 
----
+The smoke test opens each route in headless Chrome and checks the marker
+element its renderer is expected to produce.
+
+## Design system
+
+- **Type:** Cormorant Garamond (display and body) + DM Mono (the tiny
+  letter-spaced captions and nav). One Google Fonts request, `display=swap`.
+- **Colour:** ground `#0B0B0A`, ink `#ECE6DA`, muted `#A8A196`; the whole site
+  is dark. Photos are the only colour.
+- **Motion:** a hero fade and a gentle panel zoom, content reveals ≤ 600ms —
+  all disabled under `prefers-reduced-motion`.
+- **Security:** a CSP meta tag with no `'unsafe-inline'`; no inline scripts or
+  styles; content rendered with `textContent`, never `innerHTML`; every URL
+  passes through `safeUrl`.
+- **Accessibility:** landmarks, a skip link, a keyboard lightbox with a focus
+  trap that restores focus on close, visible focus rings, and ≥ 24px touch
+  targets.
 
 ## Deploying
 
-It's static, so anywhere that serves files works.
+Static files — GitHub Pages (`main` / root) or drop the folder on Netlify. The
+CSP is enforced with a `<meta>` tag. `frame-ancestors` and other header-only
+directives cannot be set in a meta tag; configure them at the host level (a
+`_headers` file on Netlify, for example) if you want them.
 
-### GitHub Pages
+`404.html` uses root-absolute links (`/css/styles.css`, `/`, `/photography/`,
+`/about/`) because the host can serve it at any URL depth. That is correct for
+Netlify, a custom domain, or a `sauravscode.github.io` user site; but if the
+site is published as a GitHub *project* page at
+`https://sauravscode.github.io/portfolio/`, prefix those paths in
+`404.html` with `/portfolio`.
 
-```bash
-git add .
-git commit -m "Portfolio"
-git push origin main
-```
+## Claude and DeepSeek workflow
 
-Then in the repo: **Settings → Pages → Build and deployment → Source: Deploy from a
-branch → Branch: `main` / root → Save.** Your site appears at
-`https://<username>.github.io/<repo>/` within a minute or two.
-
-### Netlify (drag-and-drop)
-
-Go to [app.netlify.com/drop](https://app.netlify.com/drop) and drag the project
-folder in. Done. (No build command, no publish directory needed — it's all static.)
-
-### Netlify / Vercel (from Git)
-
-Connect the repo. **Build command:** none. **Publish/Output directory:** the project
-root (`.`).
-
----
-
-## Design notes
-
-- **Type** — *Fraunces* (display serif: warmth, the reader-of-books feel),
-  *Inter* (UI), *JetBrains Mono* (metadata, the infrastructure texture). Loaded with
-  `display=swap` so text paints instantly on a serif fallback while the webfont
-  arrives — that keeps LCP low.
-- **Colour** — a warm "paper" light theme by default (most dev portfolios are dark;
-  this one isn't) with a considered warm-dark counterpart. One ember accent, used
-  sparingly. Toggle in the masthead; choice is remembered, and it honours your
-  system `prefers-color-scheme` on first visit.
-- **Motion** — restrained and purposeful: clip-reveal headlines, lift-and-fade on
-  scroll, a viewfinder cursor over photographs, an ambient "control plane" status
-  strip (a quiet nod to the day job). All of it is removed automatically under
-  `prefers-reduced-motion`.
-- **Performance** — no framework or build; lazy-loaded images with Cloudinary
-  blur-up placeholders and `srcset`; aspect ratios reserved up front so there's no
-  layout shift.
-- **Accessibility** — semantic landmarks, a skip link, keyboard-operable menu and
-  lightbox (arrows / Esc), visible focus styles, and high contrast on both themes.
-
----
-
-*Built with vanilla HTML · CSS · JS.*
+[Start a supervised coding task](docs/dual-agent.md) to plan with Claude, implement with Pi and DeepSeek, and test the portfolio locally.

@@ -1,236 +1,161 @@
 /* ============================================================================
-   data.js — THE SINGLE SOURCE OF TRUTH
+   data.js — EVERYTHING YOU EDIT LIVES HERE
    ----------------------------------------------------------------------------
-   Everything content-specific lives here. To update the site, edit this file
-   only — never touch the HTML, CSS, or app.js. The layout reads from this
-   object and renders itself.
+   The pages read this file and render themselves. To change the site, change
+   this file only — never the HTML, the CSS, or the JS.
 
-   Quick reference:
-     • site         → name, role, location, email, social links
-     • hero         → the opening statement
-     • work         → projects (order = display order; first one is featured)
-     • about        → bio paragraphs + "field notes" marginalia
-     • photography  → Cloudinary cloud name + the photo list + Instagram
-     • reading      → currently-reading and finished shelves
+   ADDING A PHOTOGRAPH (Cloudinary) — step by step
+     1. Sign in at https://cloudinary.com and open Media Library.
+     2. Upload the original. 2000–3000px on the long edge is plenty; Cloudinary
+        makes the smaller versions, so do not resize by hand.
+     3. Keep photos in a folder (e.g. "portfolio") if you like tidy names.
+     4. Click the image and copy its "Public ID" — for example
+        "portfolio/derwent-dawn" (the folder is part of the ID).
+     5. Paste that string into a `publicId` below.
+     6. Add a short `alt` — what the photo shows, for screen readers.
+     7. Save, then commit and push. That is the whole workflow.
+
+   ONE-TIME SETUP
+     • Set `cloudinary.cloudName` (below) to your Cloudinary cloud name. You
+       will find it at the top left of the Cloudinary Dashboard.
+     • Until you do, images are simply not rendered — the layout stays calm,
+       with the ground colour showing through. No broken-image icons.
+
+   HOW IMAGE URLS WORK
+     • The site builds responsive `f_auto,q_auto` Cloudinary URLs (AVIF/WebP at
+       the right width) from each publicId. Never paste a transform URL.
+     • ESCAPE HATCH: a `publicId` may also be a full `https://` image URL, or a
+       root-relative path such as "/images/derwent.jpg" (with the file committed
+       to the repo). Those are used exactly as written.
+
+   FIELD REFERENCE
+     • publicId  — Cloudinary Public ID (preferred), or a full/root-relative URL.
+     • alt       — what the image shows. Required in spirit; empty is decorative.
+     • focus     — optional object-position for cropped photos, "50% 35%". It
+                   chooses which part of the frame stays visible.
+     • ratio     — width / height (3:2 = 1.5, 2:3 = 0.667, square = 1).
+                   Photography: reserves space so the grid never jumps.
+                   Hero only: width ÷ height of the photo, used so phones
+                   download a sharp enough version.
+     • caption   — photography only: a short line shown on hover and in the
+                   lightbox.
+     • exif      — photography only, optional: "24mm · f/8 · 1/60 · ISO 100".
    ========================================================================== */
 
 const DATA = {
 
   /* --------------------------------------------------------------------------
-     SITE — identity and the links used in the masthead and footer.
+     SITE — identity and the links used in the header and footer.
+     `location` is shown as "Leeds" in the footer; keep "Leeds, UK" here.
      -------------------------------------------------------------------------- */
   site: {
     name: "Saurav Sudhar",
-    role: "Software · Infrastructure Engineer",
-    // Used by the live status strip. Any IANA timezone string works.
-    timezone: "Europe/London",
-    locationLabel: "Leeds, UK",
-    // Approximate, just for the ambient coordinate readout in the masthead.
-    coordinates: "53.8008° N, 1.5491° W",
+    tagline: "Engineer · Photographer",
     email: "sauravsnair99@gmail.com",
+    location: "Leeds, UK",
     socials: {
       github: "https://github.com/sauravscode",
       linkedin: "https://www.linkedin.com/in/saurav-sudhar/",
-      instagram: "https://www.instagram.com/"
+      instagram: "https://www.instagram.com/picsxarchive/"
     }
   },
 
   /* --------------------------------------------------------------------------
-     HERO — the first thing a visitor reads. Keep the headline short and the
-     deck human. The eyebrow is rendered in mono as a small label.
+     CLOUDINARY — one-time setup. Paste your cloud name between the quotes.
      -------------------------------------------------------------------------- */
-  hero: {
-    eyebrow: "Infrastructure for healthcare research",
-    // The headline is split into lines so each one reveals on its own.
-    // Wrap any phrase in {{ }} to print it in the accent colour.
-    headline: [
-      "I build the quiet",
-      "infrastructure that",
-      "{{healthcare research}}",
-      "runs on."
-    ],
-    deck:
-      "Kubernetes platforms for NHS Trusted Research Environments by day; " +
-      "landscapes, architecture, and the behaviour of light by way of a Nikon " +
-      "when I step away from the cluster. I care about how things are " +
-      "built — and that's the same instinct whether it's a platform or a photograph."
+  cloudinary: {
+    cloudName: "loqdzgcd"
   },
 
   /* --------------------------------------------------------------------------
-     WORK — the projects. The FIRST entry is rendered large as the centrepiece;
-     the rest follow as an indexed list. Each "manifest" is the small spec-sheet
-     of key/value metadata shown in mono.
+     HERO — the full-screen opening photograph. Empty publicId = plain ground,
+     with the name still shown. `focus` picks which part of the frame survives
+     the full-screen crop.
      -------------------------------------------------------------------------- */
-  work: [
+  hero: {
+    image: {
+      publicId: "DSC_0429",
+      alt: "A car on a winding road through a highland glen beneath mountains at sunset",
+      focus: "70% 50%",
+      ratio: 1.895
+    }
+  },
+
+  /* --------------------------------------------------------------------------
+     PANELS — the three tall image panels on the home page, in order.
+     The whole panel is a link, so `title` and `caption` carry its meaning.
+     -------------------------------------------------------------------------- */
+  panels: [
     {
-      id: "k8tre",
-      name: "karectl / k8tre",
-      tagline: "Production Kubernetes for NHS Trusted Research Environments",
-      year: "2024 — present",
-      featured: true,
-      description:
-        "The centre of what I do. A multi-trust, GitOps-driven platform that gives " +
-        "NHS research teams a secure place to work with sensitive data — without that " +
-        "data ever leaving safe hands. Single sign-on through Keycloak, distributed " +
-        "storage across Longhorn and SeaweedFS, network policy enforced with Cilium, " +
-        "and an Argo-driven delivery pipeline, all built toward SATRE compliance. " +
-        "Real infrastructure, in service, held to a standard that matters.",
-      stack: ["Kubernetes", "ArgoCD", "Terraform", "Helm", "Cilium",
-              "Longhorn", "SeaweedFS", "Keycloak", "Azure AKS"],
-      manifest: {
-        Status: "In production",
-        Scope: "Multi-trust",
-        Delivery: "GitOps",
-        Compliance: "SATRE"
-      },
-      links: [
-        { label: "Repository", href: "https://github.com/k8tre" }
-      ]
+      title: "Work",
+      caption: "Software and infrastructure engineer",
+      href: "about/#work",
+      image: { publicId: "DSC_0068", alt: "Two people walking through a rain-wet underpass lined with relief murals" }
     },
     {
-      id: "fastomop",
-      name: "FastOMOP",
-      tagline: "Natural-language querying over OMOP clinical databases",
-      year: "2025",
-      description:
-        "Ask a clinical question in plain English; get a grounded query over a " +
-        "standardised OMOP data model in return. Built to shorten the distance " +
-        "between a researcher's question and the data that answers it.",
-      stack: ["Python", "LLMs", "OMOP CDM", "PostgreSQL"],
-      manifest: {
-        Status: "Active",
-        Domain: "Clinical data",
-        Interface: "Natural language"
-      },
-      links: [
-        { label: "Repository", href: "https://github.com/sauravscode" }
-      ]
+      title: "Photography",
+      caption: "Landscape, architecture and light",
+      href: "photography/",
+      image: { publicId: "DSC_0588", alt: "A curved stone viaduct crossing a wooded highland glen" }
     },
     {
-      id: "fastrtt",
-      name: "FastRTT",
-      tagline: "Multi-agent validation for NHS referral-to-treatment pathways",
-      year: "2025",
-      description:
-        "A multi-agent system that walks the long, rule-heavy journey from referral " +
-        "to treatment and checks it for the errors that quietly delay patients. The " +
-        "rules are unforgiving; the cost of getting them wrong is measured in waiting.",
-      stack: ["Python", "Multi-agent AI", "NHS RTT rules"],
-      manifest: {
-        Status: "Active",
-        Domain: "NHS pathways",
-        Pattern: "Multi-agent"
-      },
-      links: [
-        { label: "Repository", href: "https://github.com/sauravscode" }
-      ]
-    },
-    {
-      id: "kubecon-scraper",
-      name: "KubeCon Schedule Scraper",
-      tagline: "Playwright tooling for KubeCon 2026 sessions and slide decks",
-      year: "2026",
-      description:
-        "A scraper that pulled the full session schedule and slide decks from " +
-        "KubeCon 2026 — because the conference site made the thing I wanted hard to " +
-        "get, and that's usually a sign worth building a small, sharp tool for.",
-      stack: ["Python", "Playwright"],
-      manifest: {
-        Status: "Complete",
-        Type: "Automation",
-        Target: "KubeCon 2026"
-      },
-      links: [
-        { label: "Repository", href: "https://github.com/sauravscode" }
-      ]
+      title: "Contact",
+      caption: "Say hello",
+      href: "about/#contact",
+      image: { publicId: "DSC_0166", alt: "A piper in full highland dress playing on a sandstone street" }
     }
   ],
 
   /* --------------------------------------------------------------------------
-     ABOUT — keep it short and human. Each string in `paragraphs` is one block.
-     `notes` are the small mono entries in the margin (your "field log").
+     ABOUT — the portrait, two short paragraphs, and the NOW line.
      -------------------------------------------------------------------------- */
   about: {
+    image: { publicId: "DSC_0164", alt: "A turreted sandstone building on a city corner under a blue sky" },
     paragraphs: [
       "I'm a software and infrastructure engineer at Lancashire Teaching Hospitals, " +
       "where I help build and run a Kubernetes-based Trusted Research Environment — " +
       "the secure ground that lets researchers work with sensitive NHS data.",
 
-      "I'm early in my career and, by most measures, in slightly over my head — which " +
-      "is exactly where I like to be. The work is real: production clusters, multiple " +
-      "trusts, GitOps all the way down. I've learned Kubernetes the way you learn a " +
-      "language by moving to the country — certifications along the way, but mostly by " +
-      "being responsible for things that simply have to stay up.",
-
-      "Away from the cluster I read constantly and photograph compulsively — " +
-      "landscapes, architecture, the structure of light. I moved from Cardiff to " +
-      "Leeds at the start of 2026. I've come to think infrastructure and photography " +
-      "are the same discipline wearing different clothes: both are about noticing " +
-      "what holds a thing together, and then getting out of the way."
+      "I'm early in my career and in slightly over my head, which is where I like to " +
+      "be: production clusters, multiple trusts, GitOps all the way down. Away from " +
+      "the cluster I read constantly and photograph compulsively. I moved from " +
+      "Cardiff to Leeds in early 2026."
     ],
-    notes: [
-      { k: "Now", v: "Junior Software / Infrastructure Engineer, Lancashire Teaching Hospitals NHS FT" },
-      { k: "Field", v: "Healthcare data infrastructure · research computing · cloud-native" },
-      { k: "Learning", v: "Kubernetes certification journey, ongoing" },
-      { k: "Seen", v: "KubeCon 2026" },
-      { k: "Seen", v: "HDR UK Conference" },
-      { k: "Based", v: "Leeds, relocated from Cardiff, early 2026" }
-    ]
+    now: "Software & Infrastructure Engineer, Lancashire Teaching Hospitals NHS FT"
   },
 
   /* --------------------------------------------------------------------------
-     PHOTOGRAPHY — the gallery is driven by Cloudinary.
+     WORK — one short paragraph and the Clarke quote. No project list.
+     -------------------------------------------------------------------------- */
+  work: {
+    quote: "Any sufficiently advanced technology is indistinguishable from magic.",
+    quoteAuthor: "Arthur C. Clarke",
+    text:
+      "At Lancashire Teaching Hospitals I help build and run k8tre: a multi-trust, " +
+      "GitOps-driven Kubernetes platform for NHS Trusted Research Environments. It " +
+      "gives research teams a secure place to work with sensitive data, without that " +
+      "data ever leaving safe hands — single sign-on, distributed storage, enforced " +
+      "network policy, and delivery toward SATRE compliance."
+  },
 
-     1. Set `cloudName` to your Cloudinary cloud name (Dashboard → top left).
-     2. Upload your photos to Cloudinary. For each one, copy its "Public ID"
-        (e.g. "portfolio/derwent-water" — folder included).
-     3. Add an entry below. The app builds optimised, responsive URLs for you
-        (f_auto, q_auto, blur-up placeholder) — you never write a transform.
-
-     `ratio` is width/height — it reserves space so the page never jumps while
-     images load. Get it from the photo's dimensions (e.g. 3:2 landscape = 1.5,
-     2:3 portrait = 0.667, square = 1).
-
-     No Cloudinary yet? You can also drop a full image URL in `publicId` and it
-     will be used as-is, so you can wire content first and switch later.
+  /* --------------------------------------------------------------------------
+     PHOTOGRAPHY — the gallery grid. Each photo uses the fields described at the
+     top of this file. Ratio reserves space; caption shows on hover and in the
+     lightbox; exif is optional.
      -------------------------------------------------------------------------- */
   photography: {
-    cloudName: "your-cloud-name",
-    instagram: "https://www.instagram.com/",
-    gear: "Nikon Z50 II",
     photos: [
-      { publicId: "portfolio/photo-01", ratio: 1.5,  caption: "Northern fells, first light" },
-      { publicId: "portfolio/photo-02", ratio: 0.667, caption: "Concrete and sky" },
-      { publicId: "portfolio/photo-03", ratio: 1.5,  caption: "Coast road" },
-      { publicId: "portfolio/photo-04", ratio: 1,     caption: "Stairwell geometry" },
-      { publicId: "portfolio/photo-05", ratio: 1.5,  caption: "Valley in cloud" },
-      { publicId: "portfolio/photo-06", ratio: 0.667, caption: "Glass facade" },
-      { publicId: "portfolio/photo-07", ratio: 1.5,  caption: "Harbour, low tide" },
-      { publicId: "portfolio/photo-08", ratio: 1.5,  caption: "Moorland weather" },
-      { publicId: "portfolio/photo-09", ratio: 0.667, caption: "Brutalist detail" },
-      { publicId: "portfolio/photo-10", ratio: 1.5,  caption: "The road to Leeds" }
-    ]
-  },
-
-  /* --------------------------------------------------------------------------
-     READING — two shelves. `note` is optional and shown small, in your voice.
-     -------------------------------------------------------------------------- */
-  reading: {
-    current: [
-      { title: "Designing Data-Intensive Applications", author: "Martin Kleppmann",
-        tag: "Technical", note: "The one everyone in infra circles back to." },
-      { title: "The Overstory", author: "Richard Powers",
-        tag: "Fiction", note: "Slow on purpose, in the best way." }
-    ],
-    finished: [
-      { title: "Site Reliability Engineering", author: "Google", tag: "Technical" },
-      { title: "Kubernetes in Action", author: "Marko Lukša", tag: "Technical" },
-      { title: "A Philosophy of Software Design", author: "John Ousterhout", tag: "Technical" },
-      { title: "Seeing Like a State", author: "James C. Scott", tag: "Non-fiction" },
-      { title: "Thinking, Fast and Slow", author: "Daniel Kahneman", tag: "Non-fiction" },
-      { title: "The Order of Time", author: "Carlo Rovelli", tag: "Non-fiction" },
-      { title: "On Photography", author: "Susan Sontag", tag: "Essays" },
-      { title: "Tomorrow, and Tomorrow, and Tomorrow", author: "Gabrielle Zevin", tag: "Fiction" }
+      { publicId: "DSC_0429", ratio: 1.895,  caption: "Road through the glen" },
+      { publicId: "DSC_0588", ratio: 1.7976, caption: "Viaduct in the glen" },
+      { publicId: "DSC_0333", ratio: 1.4321, caption: "Pillars of light" },
+      { publicId: "DSC_0068", ratio: 1.7986, caption: "Underpass, after rain" },
+      { publicId: "DSC_0166", ratio: 1.5576, caption: "The piper" },
+      { publicId: "DSC_0164", ratio: 1.5002, caption: "Corner, late light" },
+      { publicId: "DSC_0679", ratio: 1.699,  caption: "Platform, steam railway" },
+      { publicId: "DSC_0076", ratio: 1.5002, caption: "Winter fair" }
     ]
   }
 };
+
+// Expose globally so the (module) app can read it. Edit above — not this line.
+window.DATA = DATA;

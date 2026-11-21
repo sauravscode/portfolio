@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://res.cloudinary.com; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'" />
+
+  <title>Photography — Saurav Sudhar</title>
+  <meta name="description" content="Photographs by Saurav Sudhar — landscape, architecture and the behaviour of light." />
+  <meta name="author" content="Saurav Sudhar" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#0B0B0A" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Photography — Saurav Sudhar" />
+  <meta property="og:description" content="Landscape, architecture and the behaviour of light." />
+  <meta property="og:image" content="https://res.cloudinary.com/loqdzgcd/image/upload/f_jpg,q_auto,c_fill,g_auto,w_1200,h_630/DSC_0429" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="A car on a winding road through a highland glen beneath mountains at sunset" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Photography — Saurav Sudhar" />
+  <meta name="twitter:description" content="Landscape, architecture and the behaviour of light." />
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20fill='%230B0B0A'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='7'%20fill='%23ECE6DA'/%3E%3C/svg%3E" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&amp;family=DM+Mono:wght@400&amp;display=swap" />
+  <link rel="stylesheet" href="../css/styles.css" />
+
+  <script src="../js/data.js"></script>
+  <script type="module" src="../js/app.js"></script>
+</head>
+
+<body data-page="photography">
+  <noscript>
+    <p class="noscript">This site renders its content with JavaScript. Reach me at
+      <a href="mailto:sauravsnair99@gmail.com">sauravsnair99@gmail.com</a> or
+      <a href="https://github.com/sauravscode" rel="noopener noreferrer">github.com/sauravscode</a>.</p>
+  </noscript>
+
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-head" id="site-head"></header>
+
+  <main id="main" tabindex="-1">
+    <section class="page-head" aria-labelledby="photo-title">
+      <div class="wrap">
+        <h1 class="display" id="photo-title">Photography</h1>
+        <p class="page-sub mono" id="photo-sub"></p>
+      </div>
+    </section>
+
+    <section class="gallery" id="gallery" aria-label="Photographs"></section>
+  </main>
+
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photograph viewer" hidden>
+    <button class="lb-close mono" id="lb-close" type="button" aria-label="Close viewer">Close</button>
+    <button class="lb-prev mono" id="lb-prev" type="button" aria-label="Previous photograph">Prev</button>
+    <figure class="lb-figure">
+      <img id="lb-img" alt="" />
+      <figcaption class="lb-cap mono" id="lb-cap"></figcaption>
+    </figure>
+    <button class="lb-next mono" id="lb-next" type="button" aria-label="Next photograph">Next</button>
+  </div>
+
+  <footer class="site-foot" id="site-foot"></footer>
+</body>
+</html>
