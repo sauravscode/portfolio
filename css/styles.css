@@ -1,20 +1,3 @@
-/* ============================================================================
-   GALLERY — a simple, grand, image-led portfolio.
-
-   Sections:
-     TOKENS · RESET · TYPOGRAPHY · LAYOUT · HEADER · FOOTER · UTILITIES
-     FOCUS · REDUCED MOTION
-     HOME · PHOTOGRAPHY · LIGHTBOX · ABOUT   (filled by M2–M3)
-
-   Stack: vanilla CSS, one stylesheet, no build step. The only inline styles
-   are set from JS through element.style.setProperty (allowed by CSP); the HTML
-   carries none.
-   ========================================================================== */
-
-/* ============================================================================
-   TOKENS
-   ========================================================================== */
-
 :root {
   color-scheme: dark;
 
@@ -32,10 +15,6 @@
   --measure: 640px;
   --ease: cubic-bezier(0.2, 0.6, 0.2, 1);
 }
-
-/* ============================================================================
-   RESET
-   ========================================================================== */
 
 *,
 *::before,
@@ -117,10 +96,6 @@ button {
   color: var(--ground);
 }
 
-/* ============================================================================
-   TYPOGRAPHY
-   ========================================================================== */
-
 h1,
 h2,
 h3,
@@ -150,7 +125,6 @@ em {
   font-weight: 300;
 }
 
-/* The tiny letter-spaced uppercase line: captions, nav, labels. */
 .mono {
   font-family: var(--font-mono);
   font-weight: 400;
@@ -159,10 +133,6 @@ em {
   letter-spacing: 0.2em;
   text-transform: uppercase;
 }
-
-/* ============================================================================
-   LAYOUT
-   ========================================================================== */
 
 .wrap {
   width: 100%;
@@ -187,16 +157,11 @@ em {
   color: var(--muted);
 }
 
-/* ============================================================================
-   HEADER
-   ========================================================================== */
-
 .site-head {
   position: relative;
   z-index: 20;
 }
 
-/* Over the home hero: no band, just type on the photograph. */
 .site-head--overlay {
   position: absolute;
   inset: 0 0 auto 0;
@@ -246,13 +211,10 @@ em {
   text-underline-offset: 0.5em;
 }
 
-/* Over the home hero there is no current link; every nav link reads bright. */
 .site-head--overlay .nav-link {
   color: var(--ink);
 }
 
-/* On the home hero the ivory wordmark and nav sit on a bright sky; the same
-   soft halo as the tagline keeps them legible without a visible box. */
 .site-head--overlay .wordmark,
 .site-head--overlay .nav-link {
   text-shadow:
@@ -260,10 +222,6 @@ em {
     0 1px 3px rgba(0, 0, 0, 0.8),
     0 2px 18px rgba(0, 0, 0, 0.85);
 }
-
-/* ============================================================================
-   FOOTER
-   ========================================================================== */
 
 .site-foot {
   margin-top: clamp(4rem, 12vh, 9rem);
@@ -316,15 +274,6 @@ em {
   color: var(--muted);
 }
 
-/* ============================================================================
-   TOUCH TARGETS
-   ----------------------------------------------------------------------------
-   Every nav/contact link is at least 24×24px (WCAG target size), and on touch
-   screens the primary links grow to 44px tall. Height is added with padding so
-   the inline-flex labels stay centred and each row keeps its alignment. The
-   visible type size is untouched.
-   ========================================================================== */
-
 .wordmark,
 .nav-link,
 .foot-link,
@@ -349,15 +298,9 @@ em {
   .foot-link,
   .contact-social,
   .page-sub-link {
-    /* 44px tap target: the mono line-height (1.4em) plus symmetric padding,
-       centred by the base inline-flex + align-items:center. */
     padding-block: calc((44px - 1.4em) / 2);
   }
 }
-
-/* ============================================================================
-   UTILITIES
-   ========================================================================== */
 
 .visually-hidden {
   position: absolute !important;
@@ -413,23 +356,14 @@ em {
   transform: none;
 }
 
-/* A photo that failed to load leaves its parent as a quiet tile. */
 .is-imgless {
   background-color: var(--fallback);
 }
-
-/* ============================================================================
-   FOCUS
-   ========================================================================== */
 
 :where(a, button, [tabindex]):focus-visible {
   outline: 1px solid var(--ink);
   outline-offset: 3px;
 }
-
-/* ============================================================================
-   REDUCED MOTION
-   ========================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
   html {
@@ -449,7 +383,6 @@ em {
     transform: none;
   }
 
-  /* M2: the hero photograph appears at once; no settle zoom. */
   .hero-img {
     opacity: 1;
     animation: none;
@@ -461,18 +394,10 @@ em {
     transform: none;
   }
 
-  /* M3: gallery photos appear at once; no hover zoom (see the no-preference
-     query in the PHOTOGRAPHY section). */
   .shot-img {
     opacity: 1;
   }
 }
-
-/* ============================================================================
-   HOME — hero and panels (M2)
-   ========================================================================== */
-
-/* ---- hero ------------------------------------------------------------------ */
 
 .hero {
   position: relative;
@@ -481,13 +406,9 @@ em {
   overflow: hidden;
   background: var(--ground);
 
-  /* Same horizontal frame as the header's .wrap (max-width 1200px centred,
-     inset by the gutter), so the hero name and Scroll cue line up with the
-     wordmark and nav at ≥ 640px. Below that the frame collapses to the gutter. */
   --frame: max(var(--gutter), calc((100vw - var(--wrap)) / 2 + var(--gutter)));
 }
 
-/* No resolvable image: keep the plain ground, never a fallback tile. */
 .hero.is-imgless {
   background: var(--ground);
 }
@@ -503,9 +424,6 @@ em {
   transition: opacity 1.2s ease;
 }
 
-/* One-time "settle": the photograph eases from a slight zoom to true scale as
-   it fades in. Runs once on load, never loops. The hero has overflow:hidden,
-   so the scaled image never causes a scrollbar. */
 @keyframes hero-settle {
   from {
     transform: scale(1.06);
@@ -548,8 +466,6 @@ em {
   color: var(--ink);
 }
 
-/* Text over a photograph: a soft dark halo keeps the small caps legible over
-   any part of any image (bright lights included), without a visible box. */
 .hero-tagline,
 .hero-cue {
   text-shadow:
@@ -588,8 +504,6 @@ em {
   background: #fff;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.9);
 }
-
-/* ---- panels ---------------------------------------------------------------- */
 
 .panels {
   display: grid;
@@ -672,8 +586,6 @@ em {
   outline-offset: -6px;
 }
 
-/* ---- hero + panels on small screens --------------------------------------- */
-
 @media (max-width: 899.98px) {
   .panels {
     grid-template-columns: 1fr;
@@ -694,11 +606,6 @@ em {
   }
 }
 
-/* ============================================================================
-   PHOTOGRAPHY — editorial grid (M3)
-   ========================================================================== */
-
-/* The count + Instagram line under the page title. */
 .page-sub a {
   color: var(--ink);
   text-decoration: underline;
@@ -716,8 +623,6 @@ em {
   padding-block: clamp(4rem, 14vh, 8rem);
 }
 
-/* Editorial grid: 1 col under 900px, 2 cols at 900px and up; a trailing odd
-   photo spans the full row so the grid never ends ragged. */
 .gallery-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -731,8 +636,6 @@ em {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  /* Pair up photos at a shared shape so frames and captions in a row align.
-     Feature items keep their natural --ratio. */
   .gallery-item:not(.gallery-item--feature) .shot-frame {
     aspect-ratio: 8 / 5;
   }
@@ -742,8 +645,6 @@ em {
   grid-column: 1 / -1;
 }
 
-/* Each photograph is a button that opens the lightbox: the image frame first,
-   the always-visible caption below it. */
 .shot {
   display: block;
   width: 100%;
@@ -771,8 +672,6 @@ em {
   opacity: 1;
 }
 
-/* Subtle hover/focus zoom on the image only, clipped by the frame's overflow.
-   Disabled entirely under reduced motion. */
 @media (prefers-reduced-motion: no-preference) {
   .shot:hover .shot-img,
   .shot:focus-visible .shot-img {
@@ -780,7 +679,6 @@ em {
   }
 }
 
-/* Caption: quiet mono line, always visible below the frame. */
 .shot-cap {
   display: block;
   margin-top: 12px;
@@ -790,11 +688,6 @@ em {
   opacity: 1;
 }
 
-/* ============================================================================
-   LIGHTBOX — viewer (M3)
-   ========================================================================== */
-
-/* Scroll lock: added to <html> while the viewer is open. */
 html.is-locked {
   overflow: hidden;
 }
@@ -824,8 +717,6 @@ html.is-locked {
   position: relative;
 }
 
-/* The frame keeps the photo's shape while it loads (--lb-ratio is set from
-   data), so switching photos never collapses or jumps the layout. */
 #lb-img {
   aspect-ratio: var(--lb-ratio, 1.5);
   width: min(92vw, calc(82vh * var(--lb-ratio, 1.5)));
@@ -842,14 +733,11 @@ html.is-locked {
   transition: none;
 }
 
-/* Horizontal swipes drive prev/next, so let the browser keep only vertical
-   panning on the figure and image. (The page is scroll-locked anyway.) */
 .lb-figure,
 #lb-img {
   touch-action: pan-y;
 }
 
-/* A quiet "Loading" in the centre of the reserved frame. */
 .lightbox.is-loading .lb-figure::before {
   content: "Loading";
   position: absolute;
@@ -907,7 +795,6 @@ html.is-locked {
   transform: translateY(-50%);
 }
 
-/* On small screens Prev/Next move to the bottom corners. */
 @media (max-width: 639.98px) {
   .lb-prev {
     top: auto;
@@ -924,21 +811,14 @@ html.is-locked {
   }
 }
 
-/* ============================================================================
-   ABOUT — portrait, work, contact (M3)
-   ========================================================================== */
-
 #work,
 #contact {
   scroll-margin-top: 24px;
 }
 
-/* M3 fix: end the portrait + text block well above the #work hairline. */
 #about-main {
   padding-bottom: clamp(80px, 14vh, 160px);
 }
-
-/* ---- portrait + text ------------------------------------------------------ */
 
 .about-grid {
   display: grid;
@@ -999,13 +879,10 @@ html.is-locked {
     max-height: 70svh;
   }
 
-  /* A missing portrait never dominates a stacked page. */
   .about-photo.is-imgless {
     display: none;
   }
 }
-
-/* ---- work pause ----------------------------------------------------------- */
 
 .measure-wide {
   max-width: 900px;
@@ -1046,8 +923,6 @@ html.is-locked {
   margin-top: clamp(2rem, 5vh, 3.5rem);
   color: var(--ink);
 }
-
-/* ---- contact -------------------------------------------------------------- */
 
 .contact {
   padding-block: clamp(80px, 14vh, 160px);

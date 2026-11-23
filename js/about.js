@@ -1,16 +1,3 @@
-/* ============================================================================
-   about.js — portrait, paragraphs, the work pause, and contact (M3).
-
-   Three sections, rendered from window.DATA:
-     • #about-main — a two-column portrait + text block;
-     • #work      — a labelled pause holding the Clarke quote and one paragraph;
-     • #contact   — the socials.
-
-   Text goes through textContent; URLs through safeUrl/extLink; the portrait
-   through makeImg(). Optional fields (socials, quote) simply render
-   nothing when missing — never "undefined".
-   ========================================================================== */
-
 import { D, el, extLink, makeImg, socialIcon } from "./core.js";
 
 function renderAboutMain() {
@@ -19,8 +6,6 @@ function renderAboutMain() {
 
   const grid = el("div", "wrap about-grid");
 
-  // Portrait — a 4:5 tile. When the photo is missing we keep the quiet tile on
-  // desktop, but hide it on mobile so it never dominates a stacked page.
   const photo = el("div", "about-photo");
   const img = makeImg(D.about.image, {
     crop: { aspect: "4:5" },
@@ -58,8 +43,6 @@ function renderWork() {
 
   const wrap = el("div", "wrap measure-wide");
 
-  // The section keeps a real heading for the outline; the visible mono label
-  // is a duplicate, so it is hidden from assistive tech.
   const heading = el("h2", "visually-hidden", "Work");
   heading.id = "work-title";
   wrap.append(heading);

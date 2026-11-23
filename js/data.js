@@ -1,55 +1,5 @@
-/* ============================================================================
-   data.js — EVERYTHING YOU EDIT LIVES HERE
-   ----------------------------------------------------------------------------
-   The pages read this file and render themselves. To change the site, change
-   this file only — never the HTML, the CSS, or the JS.
-
-   ADDING A PHOTOGRAPH (Cloudinary) — step by step
-     1. Sign in at https://cloudinary.com and open Media Library.
-     2. Upload the original. 2000–3000px on the long edge is plenty; Cloudinary
-        makes the smaller versions, so do not resize by hand.
-     3. Keep photos in a folder (e.g. "portfolio") if you like tidy names.
-     4. Click the image and copy its "Public ID" — for example
-        "portfolio/derwent-dawn" (the folder is part of the ID).
-     5. Paste that string into a `publicId` below.
-     6. Add a short `alt` — what the photo shows, for screen readers.
-     7. Save, then commit and push. That is the whole workflow.
-
-   ONE-TIME SETUP
-     • Set `cloudinary.cloudName` (below) to your Cloudinary cloud name. You
-       will find it at the top left of the Cloudinary Dashboard.
-     • Until you do, images are simply not rendered — the layout stays calm,
-       with the ground colour showing through. No broken-image icons.
-
-   HOW IMAGE URLS WORK
-     • The site builds responsive `f_auto,q_auto` Cloudinary URLs (AVIF/WebP at
-       the right width) from each publicId. Never paste a transform URL.
-     • ESCAPE HATCH: a `publicId` may also be a full `https://` image URL, or a
-       root-relative path such as "/images/derwent.jpg" (with the file committed
-       to the repo). Those are used exactly as written.
-
-   FIELD REFERENCE
-     • publicId  — Cloudinary Public ID (preferred), or a full/root-relative URL.
-     • alt       — what the image shows. Required in spirit; empty is decorative.
-     • focus     — optional object-position for cropped photos, "50% 35%". It
-                   chooses which part of the frame stays visible.
-     • gravity   — optional, for cropped spots (panels, About): which part of the
-                   photo the crop keeps: auto (default), center, north, south,
-                   east, west…
-     • ratio     — width / height (3:2 = 1.5, 2:3 = 0.667, square = 1).
-                   Photography: reserves space so the grid never jumps.
-                   Hero only: width ÷ height of the photo, used so phones
-                   download a sharp enough version.
-     • caption   — photography only: a short line shown on hover and in the
-                   lightbox.
-     • exif      — photography only, optional: "24mm · f/8 · 1/60 · ISO 100".
-   ========================================================================== */
-
 const DATA = {
 
-  /* --------------------------------------------------------------------------
-     SITE — identity and the links used in the header and footer.
-     -------------------------------------------------------------------------- */
   site: {
     name: "Saurav Sudhar",
     tagline: "Engineer · Photographer",
@@ -60,18 +10,10 @@ const DATA = {
     }
   },
 
-  /* --------------------------------------------------------------------------
-     CLOUDINARY — one-time setup. Paste your cloud name between the quotes.
-     -------------------------------------------------------------------------- */
   cloudinary: {
     cloudName: "loqdzgcd"
   },
 
-  /* --------------------------------------------------------------------------
-     HERO — the full-screen opening photograph. Empty publicId = plain ground,
-     with the name still shown. `focus` picks which part of the frame survives
-     the full-screen crop.
-     -------------------------------------------------------------------------- */
   hero: {
     image: {
       publicId: "DSC_0429",
@@ -81,10 +23,6 @@ const DATA = {
     }
   },
 
-  /* --------------------------------------------------------------------------
-     PANELS — the three tall image panels on the home page, in order.
-     The whole panel is a link, so `title` and `caption` carry its meaning.
-     -------------------------------------------------------------------------- */
   panels: [
     {
       title: "Work",
@@ -106,9 +44,6 @@ const DATA = {
     }
   ],
 
-  /* --------------------------------------------------------------------------
-     ABOUT — the portrait, two short paragraphs, and the NOW line.
-     -------------------------------------------------------------------------- */
   about: {
     image: { publicId: "DSC_0164", alt: "A turreted sandstone building on a city corner under a blue sky" },
     paragraphs: [
@@ -118,15 +53,11 @@ const DATA = {
 
       "I'm early in my career and in slightly over my head, which is where I like to " +
       "be: production clusters, multiple trusts, GitOps all the way down. Away from " +
-      "the cluster I read constantly and photograph compulsively. I moved from " +
-      "Cardiff to Leeds in early 2026."
+      "the cluster I read constantly and photograph compulsively."
     ],
     now: "Software & Infrastructure Engineer, Lancashire Teaching Hospitals NHS FT"
   },
 
-  /* --------------------------------------------------------------------------
-     WORK — one short paragraph and the Clarke quote. No project list.
-     -------------------------------------------------------------------------- */
   work: {
     quote: "Any sufficiently advanced technology is indistinguishable from magic.",
     quoteAuthor: "Arthur C. Clarke",
@@ -138,11 +69,6 @@ const DATA = {
       "network policy, and delivery toward SATRE compliance."
   },
 
-  /* --------------------------------------------------------------------------
-     PHOTOGRAPHY — the gallery grid. Each photo uses the fields described at the
-     top of this file. Ratio reserves space; caption shows on hover and in the
-     lightbox; exif is optional.
-     -------------------------------------------------------------------------- */
   photography: {
     photos: [
       { publicId: "DSC_0429", ratio: 1.895,  caption: "Road through the glen" },
@@ -157,5 +83,4 @@ const DATA = {
   }
 };
 
-// Expose globally so the (module) app can read it. Edit above — not this line.
 window.DATA = DATA;

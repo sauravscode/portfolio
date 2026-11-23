@@ -1,16 +1,3 @@
-/* ============================================================================
-   core.js — shared helpers and chrome.
-
-   Everything here is small on purpose:
-     • el / safeUrl / extLink      — DOM and URL primitives
-     • imageSources / makeImg      — Cloudinary-aware responsive images
-     • renderHeader / renderFooter — the shared chrome
-     • initReveals                 — restrained scroll reveal
-
-   Rules: all text goes in through textContent; HTML strings are never parsed.
-   URLs coming from data pass through safeUrl() before they reach an href.
-   ========================================================================== */
-
 export const D = typeof window !== "undefined" ? window.DATA || null : null;
 export const PAGE =
   typeof document !== "undefined" && document.body
@@ -18,9 +5,6 @@ export const PAGE =
     : "home";
 export const ROOT = PAGE === "home" ? "" : "../";
 
-/* ---- tiny DOM helpers ------------------------------------------------------ */
-
-/** Create an element with an optional class and text. */
 export function el(tag, cls, text) {
   const node = document.createElement(tag);
   if (cls) node.className = cls;
@@ -28,12 +12,6 @@ export function el(tag, cls, text) {
   return node;
 }
 
-/* ---- URLs ------------------------------------------------------------------ */
-
-/**
- * Allow only https:, mailto:, or a relative path (no scheme).
- * Returns null for anything else (javascript:, data:, protocol-relative, ...).
- */
 export function safeUrl(url) {
   if (typeof url !== "string") return null;
   const raw = url.trim();
@@ -45,12 +23,10 @@ export function safeUrl(url) {
   if (/^mailto:/i.test(raw)) return raw;
   if (raw.startsWith("/") || raw.startsWith("../") || raw.startsWith("./")) return raw;
 
-  // A bare relative path ("photography/", "index.html#contact") has no scheme.
   if (!/^[a-z][a-z0-9+.-]*:/i.test(raw)) return raw;
   return null;
 }
 
-/** Outbound link with rel="noopener noreferrer"; null when the URL is unsafe. */
 export function extLink(cls, label, href) {
   const url = safeUrl(href);
   if (!url) return null;
@@ -60,8 +36,6 @@ export function extLink(cls, label, href) {
   if (/^https:\/\//i.test(url)) a.target = "_blank";
   return a;
 }
-
-/* ---- social icons ---------------------------------------------------------- */
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
@@ -83,10 +57,6 @@ const SOCIAL_ICONS = {
   ]
 };
 
-/**
- * Build a Lucide line icon as inline SVG using createElementNS (never HTML
- * strings). Returns null for an unknown name.
- */
 export function socialIcon(name) {
   const shapes = SOCIAL_ICONS[name];
   if (!shapes) return null;
@@ -115,13 +85,10 @@ export function socialIcon(name) {
   return svg;
 }
 
-/* ---- responsive images ----------------------------------------------------- */
-
 const DEFAULT_WIDTHS = [640, 960, 1280, 1920, 2560];
 const CLOUD_NAME = /^[A-Za-z0-9_-]+$/;
 const FOCUS = /^\d{1,3}% \d{1,3}%$/;
 
-/** The configured Cloudinary cloud name, or "" when unset/placeholder/invalid. */
 function cloudName() {
   const cloud = D && D.cloudinary && typeof D.cloudinary.cloudName === "string"
     ? D.cloudinary.cloudName.trim()
@@ -138,7 +105,6 @@ function cleanWidths(widths) {
   return unique.length ? unique : DEFAULT_WIDTHS.slice();
 }
 
-/** `{ aspect: "3:4" }` → "3:4", or null when the crop is unusable. */
 function cleanCrop(crop) {
   if (!crop || typeof crop !== "object") return null;
   const aspect = typeof crop.aspect === "string" ? crop.aspect.trim() : "";
@@ -153,7 +119,6 @@ const GRAVITIES = [
   "north_east", "north_west", "south_east", "south_west", "face", "faces"
 ];
 
-/** `g_<value>` when image.gravity is allowed for a crop, otherwise `g_auto`. */
 function cropGravity(image) {
   const value = image && typeof image.gravity === "string" ? image.gravity.trim().toLowerCase() : "";
   return GRAVITIES.includes(value) ? value : "auto";
@@ -166,20 +131,6 @@ function cloudinaryUrl(cloud, publicId, width, aspect, gravity) {
   return `https://res.cloudinary.com/${cloud}/image/upload/${transform}/${publicId}`;
 }
 
-/**
- * Responsive sources for one image record ({ publicId, alt, focus }).
- *
- * Returns { src, srcset, sizes } or null when the image cannot be resolved.
- *  • full https:// URLs and root-relative "/…" paths pass through unchanged;
- *  • Cloudinary public IDs get f_auto,q_auto URLs at each requested width;
- *  • a crop (`opts.crop.aspect`) uses c_fill and g_<image.gravity> when it is an
- *    allowed value (see GRAVITIES), otherwise g_auto;
- *  • missing/empty publicId, unset/invalid cloudName, unsafe URLs and IDs
- *    containing ".." or a backslash all return null.
- *
- * @param {object} image
- * @param {{widths?: number[], crop?: {aspect?: string}, sizes?: string}} [opts]
- */
 export function imageSources(image, opts = {}) {
   if (!image || typeof image !== "object") return null;
 
@@ -188,7 +139,6 @@ export function imageSources(image, opts = {}) {
   if (/[\u0000-\u001f\u007f\\]/.test(publicId)) return null;
   if (publicId.includes("..")) return null;
 
-  // A publicId may be a full https URL or a root-relative path: use it as-is.
   if (/^https:\/\//i.test(publicId)) {
     const url = safeUrl(publicId);
     if (!url || !/^https:\/\//i.test(url)) return null;
@@ -200,7 +150,6 @@ export function imageSources(image, opts = {}) {
     return { src: url, srcset: null, sizes: null };
   }
 
-  // Any other scheme (http:, data:, javascript:, …) is not a Cloudinary ID.
   if (/^[a-z][a-z0-9+.-]*:/i.test(publicId)) return null;
   if (publicId.startsWith("#") || publicId.includes("?") || publicId.includes("#")) {
     return null;
@@ -228,15 +177,6 @@ export function imageSources(image, opts = {}) {
   };
 }
 
-/**
- * Build an <img> for an image record, or null when it cannot be resolved.
- *
- * opts: { widths, crop, sizes, eager, priority, className }
- *  • lazy by default; eager + fetchpriority=high for the hero;
- *  • object-position from image.focus only when it looks like "50% 35%";
- *  • on a load error the image removes itself and its parent gets .is-imgless,
- *    so the layout falls back to the quiet tile instead of a broken icon.
- */
 export function makeImg(image, opts = {}) {
   const sources = imageSources(image, opts);
   if (!sources) return null;
@@ -265,9 +205,6 @@ export function makeImg(image, opts = {}) {
   return img;
 }
 
-/* ---- header ---------------------------------------------------------------- */
-
-/** Build the shared header into #site-head. `page` is "home"|"photography"|"about". */
 export function renderHeader(page = PAGE) {
   const head = document.getElementById("site-head");
   if (!head) return;
@@ -299,9 +236,6 @@ export function renderHeader(page = PAGE) {
   head.replaceChildren(inner);
 }
 
-/* ---- footer ---------------------------------------------------------------- */
-
-/** Build the shared footer into #site-foot. */
 export function renderFooter() {
   const foot = document.getElementById("site-foot");
   if (!foot) return;
@@ -340,9 +274,6 @@ export function renderFooter() {
   foot.replaceChildren(inner);
 }
 
-/* ---- motion ---------------------------------------------------------------- */
-
-/** Reveal-on-scroll. Under reduced motion (or no IO) elements appear at once. */
 export function initReveals(root = document) {
   const items = Array.from(root.querySelectorAll(".reveal"));
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
