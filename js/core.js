@@ -61,6 +61,60 @@ export function extLink(cls, label, href) {
   return a;
 }
 
+/* ---- social icons ---------------------------------------------------------- */
+
+const SVG_NS = "http://www.w3.org/2000/svg";
+
+/* Lucide v0.460.0 line icons (ISC licence). */
+const SOCIAL_ICONS = {
+  github: [
+    { tag: "path", attrs: { d: "M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" } },
+    { tag: "path", attrs: { d: "M9 18c-4.51 2-5-2-7-2" } }
+  ],
+  linkedin: [
+    { tag: "path", attrs: { d: "M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" } },
+    { tag: "rect", attrs: { width: "4", height: "12", x: "2", y: "9" } },
+    { tag: "circle", attrs: { cx: "4", cy: "4", r: "2" } }
+  ],
+  instagram: [
+    { tag: "rect", attrs: { width: "20", height: "20", x: "2", y: "2", rx: "5", ry: "5" } },
+    { tag: "path", attrs: { d: "M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" } },
+    { tag: "line", attrs: { x1: "17.5", x2: "17.51", y1: "6.5", y2: "6.5" } }
+  ]
+};
+
+/**
+ * Build a Lucide line icon as inline SVG using createElementNS (never HTML
+ * strings). Returns null for an unknown name.
+ */
+export function socialIcon(name) {
+  const shapes = SOCIAL_ICONS[name];
+  if (!shapes) return null;
+
+  const svg = document.createElementNS(SVG_NS, "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("width", "20");
+  svg.setAttribute("height", "20");
+  svg.setAttribute("fill", "none");
+  svg.setAttribute("stroke", "currentColor");
+  svg.setAttribute("stroke-width", "1.25");
+  svg.setAttribute("stroke-linecap", "round");
+  svg.setAttribute("stroke-linejoin", "round");
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("focusable", "false");
+  svg.setAttribute("class", "social-icon");
+
+  for (const { tag, attrs } of shapes) {
+    const node = document.createElementNS(SVG_NS, tag);
+    for (const [key, value] of Object.entries(attrs)) {
+      node.setAttribute(key, value);
+    }
+    svg.append(node);
+  }
+
+  return svg;
+}
+
 /* ---- responsive images ----------------------------------------------------- */
 
 const DEFAULT_WIDTHS = [640, 960, 1280, 1920, 2560];
@@ -239,29 +293,29 @@ export function renderFooter() {
   if (!foot) return;
 
   const site = (D && D.site) || {};
-  const location = typeof site.location === "string" ? site.location : "Leeds, UK";
-  const city = location.split(",")[0].trim() || "Leeds";
   const name = typeof site.name === "string" && site.name.trim()
     ? site.name.trim()
     : "Saurav Sudhar";
   const year = new Date().getFullYear();
 
   const inner = el("div", "wrap foot-inner");
-  inner.append(el("p", "foot-meta mono", `\u00A9 ${year} ${name} \u00B7 ${city}`));
+  inner.append(el("p", "foot-meta mono", `\u00A9 ${year} ${name}`));
 
   const nav = el("nav", "foot-links");
   nav.setAttribute("aria-label", "Footer");
-
-  const email = typeof site.email === "string" ? site.email.trim() : "";
-  const emailLink = email ? extLink("foot-link mono", "Email", `mailto:${email}`) : null;
-  if (emailLink) nav.append(emailLink);
 
   const socials = site.socials && typeof site.socials === "object" ? site.socials : {};
   const labels = [["github", "GitHub"], ["linkedin", "LinkedIn"], ["instagram", "Instagram"]];
 
   for (const [key, label] of labels) {
-    const link = extLink("foot-link mono", label, socials[key]);
-    if (link) nav.append(link);
+    const link = extLink("foot-social", "", socials[key]);
+    if (!link) continue;
+    const icon = socialIcon(key);
+    if (!icon) continue;
+    link.setAttribute("aria-label", label);
+    link.title = label;
+    link.append(icon);
+    nav.append(link);
   }
 
   const top = el("a", "foot-top mono", "Back to top \u2191");

@@ -287,17 +287,30 @@ em {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: clamp(0.85rem, 2.2vw, 1.5rem);
+  gap: 8px;
 }
 
-.foot-link,
+.foot-social {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.foot-social:hover,
+.foot-social:focus-visible {
+  color: var(--ink);
+}
+
 .foot-top {
   color: var(--ink);
   text-decoration: none;
 }
 
-.foot-link:hover,
-.foot-link:focus-visible,
 .foot-top:hover,
 .foot-top:focus-visible {
   color: var(--muted);
@@ -1047,21 +1060,12 @@ html.is-locked {
   font-weight: 300;
 }
 
-.contact-email {
-  display: inline-block;
-  margin-top: 1.75rem;
+.contact-lede {
   font-family: var(--font-serif);
-  font-weight: 300;
-  font-size: clamp(1.5rem, 3.4vw, 2.6rem);
-  line-height: 1.15;
-  color: var(--ink);
-  text-decoration: none;
-}
-
-.contact-email:hover,
-.contact-email:focus-visible {
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
+  color: var(--muted);
+  max-width: 34em;
+  margin-top: 1.75rem;
+  margin-bottom: 1.5rem;
 }
 
 .contact-socials {
@@ -1072,11 +1076,23 @@ html.is-locked {
 }
 
 .contact-social {
-  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 44px;
+  min-height: 44px;
+  color: var(--muted);
   text-decoration: none;
+  transition: color 0.3s;
 }
 
 .contact-social:hover,
 .contact-social:focus-visible {
-  color: var(--muted);
+  color: var(--ink);
+}
+
+.social-icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
 }

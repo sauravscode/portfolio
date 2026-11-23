@@ -46,16 +46,13 @@ const DATA = {
 
   /* --------------------------------------------------------------------------
      SITE — identity and the links used in the header and footer.
-     `location` is shown as "Leeds" in the footer; keep "Leeds, UK" here.
      -------------------------------------------------------------------------- */
   site: {
     name: "Saurav Sudhar",
     tagline: "Engineer · Photographer",
-    email: "sauravsnair99@gmail.com",
-    location: "Leeds, UK",
     socials: {
       github: "https://github.com/sauravscode",
-      linkedin: "https://www.linkedin.com/in/saurav-sudhar/",
+      linkedin: "https://www.linkedin.com/in/sauravsnair/",
       instagram: "https://www.instagram.com/picsxarchive/"
     }
   },
@@ -90,7 +87,7 @@ const DATA = {
       title: "Work",
       caption: "Software and infrastructure engineer",
       href: "about/#work",
-      image: { publicId: "DSC_0068", alt: "Two people walking through a rain-wet underpass lined with relief murals" }
+      image: { publicId: "DSC_0076", alt: "A winter fair at night: a lit ferris wheel beside a glowing funfair ride" }
     },
     {
       title: "Photography",
