@@ -1,17 +1,4 @@
-/* ============================================================================
-   about.js — portrait, paragraphs, the work pause, and contact (M3).
-
-   Three sections, rendered from window.DATA:
-     • #about-main — a two-column portrait + text block;
-     • #work      — a labelled pause holding the Clarke quote and one paragraph;
-     • #contact   — the email link and the socials.
-
-   Text goes through textContent; URLs through safeUrl/extLink; the portrait
-   through makeImg(). Optional fields (email, socials, quote) simply render
-   nothing when missing — never "undefined".
-   ========================================================================== */
-
-import { D, el, safeUrl, extLink, makeImg } from "./core.js";
+import { D, el, extLink, makeImg, socialIcon } from "./core.js";
 
 function renderAboutMain() {
   const section = document.getElementById("about-main");
@@ -19,8 +6,6 @@ function renderAboutMain() {
 
   const grid = el("div", "wrap about-grid");
 
-  // Portrait — a 4:5 tile. When the photo is missing we keep the quiet tile on
-  // desktop, but hide it on mobile so it never dominates a stacked page.
   const photo = el("div", "about-photo");
   const img = makeImg(D.about.image, {
     crop: { aspect: "4:5" },
@@ -58,8 +43,6 @@ function renderWork() {
 
   const wrap = el("div", "wrap measure-wide");
 
-  // The section keeps a real heading for the outline; the visible mono label
-  // is a duplicate, so it is hidden from assistive tech.
   const heading = el("h2", "visually-hidden", "Work");
   heading.id = "work-title";
   wrap.append(heading);
@@ -98,28 +81,24 @@ function renderContact() {
   title.id = "contact-title";
   wrap.append(title);
 
-  const site = D.site || {};
-  const email = typeof site.email === "string" ? site.email.trim() : "";
-  if (email) {
-    const url = safeUrl(`mailto:${email}`);
-    if (url) {
-      const mail = el("a", "contact-email", email);
-      mail.href = url;
-      wrap.append(mail);
-    }
-  }
+  wrap.append(el("p", "contact-lede", "The best way to reach me is on LinkedIn or Instagram."));
 
+  const site = D.site || {};
   const socials =
     site.socials && typeof site.socials === "object" ? site.socials : {};
   const labels = [
-    ["github", "GitHub"],
     ["linkedin", "LinkedIn"],
-    ["instagram", "Instagram"]
+    ["instagram", "Instagram"],
+    ["github", "GitHub"]
   ];
   const row = el("div", "contact-socials");
   for (const [key, label] of labels) {
-    const link = extLink("contact-social mono", label, socials[key]);
-    if (link) row.append(link);
+    const link = extLink("contact-social", "", socials[key]);
+    if (!link) continue;
+    const icon = socialIcon(key);
+    if (icon) link.append(icon);
+    link.append(el("span", "mono", label));
+    row.append(link);
   }
   if (row.childElementCount) wrap.append(row);
 

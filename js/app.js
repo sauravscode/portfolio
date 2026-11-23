@@ -1,8 +1,3 @@
-/* ============================================================================
-   app.js — thin entry point.
-   Renders the shared chrome, then hands off to the module for <body data-page>.
-   ========================================================================== */
-
 import { D, PAGE, renderHeader, renderFooter, initReveals } from "./core.js";
 import * as home from "./home.js";
 import * as photography from "./photography.js";
