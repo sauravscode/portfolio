@@ -33,6 +33,9 @@
      • alt       — what the image shows. Required in spirit; empty is decorative.
      • focus     — optional object-position for cropped photos, "50% 35%". It
                    chooses which part of the frame stays visible.
+     • gravity   — optional, for cropped spots (panels, About): which part of the
+                   photo the crop keeps: auto (default), center, north, south,
+                   east, west…
      • ratio     — width / height (3:2 = 1.5, 2:3 = 0.667, square = 1).
                    Photography: reserves space so the grid never jumps.
                    Hero only: width ÷ height of the photo, used so phones
@@ -87,7 +90,7 @@ const DATA = {
       title: "Work",
       caption: "Software and infrastructure engineer",
       href: "about/#work",
-      image: { publicId: "DSC_0076", alt: "A winter fair at night: a lit ferris wheel beside a glowing funfair ride" }
+      image: { publicId: "DSC_0076", alt: "A winter fair at night: a lit ferris wheel beside a glowing funfair ride", gravity: "center" }
     },
     {
       title: "Photography",

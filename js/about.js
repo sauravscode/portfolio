@@ -104,9 +104,9 @@ function renderContact() {
   const socials =
     site.socials && typeof site.socials === "object" ? site.socials : {};
   const labels = [
-    ["github", "GitHub"],
     ["linkedin", "LinkedIn"],
-    ["instagram", "Instagram"]
+    ["instagram", "Instagram"],
+    ["github", "GitHub"]
   ];
   const row = el("div", "contact-socials");
   for (const [key, label] of labels) {

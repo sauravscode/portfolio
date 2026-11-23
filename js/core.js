@@ -148,9 +148,20 @@ function cleanCrop(crop) {
   return aspect;
 }
 
-function cloudinaryUrl(cloud, publicId, width, aspect) {
+const GRAVITIES = [
+  "auto", "center", "north", "south", "east", "west",
+  "north_east", "north_west", "south_east", "south_west", "face", "faces"
+];
+
+/** `g_<value>` when image.gravity is allowed for a crop, otherwise `g_auto`. */
+function cropGravity(image) {
+  const value = image && typeof image.gravity === "string" ? image.gravity.trim().toLowerCase() : "";
+  return GRAVITIES.includes(value) ? value : "auto";
+}
+
+function cloudinaryUrl(cloud, publicId, width, aspect, gravity) {
   const transform = aspect
-    ? `f_auto,q_auto,c_fill,g_auto,ar_${aspect},w_${width}`
+    ? `f_auto,q_auto,c_fill,g_${gravity},ar_${aspect},w_${width}`
     : `f_auto,q_auto,c_limit,w_${width}`;
   return `https://res.cloudinary.com/${cloud}/image/upload/${transform}/${publicId}`;
 }
@@ -161,6 +172,8 @@ function cloudinaryUrl(cloud, publicId, width, aspect) {
  * Returns { src, srcset, sizes } or null when the image cannot be resolved.
  *  • full https:// URLs and root-relative "/…" paths pass through unchanged;
  *  • Cloudinary public IDs get f_auto,q_auto URLs at each requested width;
+ *  • a crop (`opts.crop.aspect`) uses c_fill and g_<image.gravity> when it is an
+ *    allowed value (see GRAVITIES), otherwise g_auto;
  *  • missing/empty publicId, unset/invalid cloudName, unsafe URLs and IDs
  *    containing ".." or a backslash all return null.
  *
@@ -198,6 +211,7 @@ export function imageSources(image, opts = {}) {
 
   const widths = cleanWidths(opts.widths);
   const aspect = cleanCrop(opts.crop);
+  const gravity = cropGravity(image);
   const sizes = typeof opts.sizes === "string" && opts.sizes.trim()
     ? opts.sizes.trim()
     : "100vw";
@@ -206,9 +220,9 @@ export function imageSources(image, opts = {}) {
   const srcWidth = atMost.length ? atMost[atMost.length - 1] : widths[0];
 
   return {
-    src: cloudinaryUrl(cloud, publicId, srcWidth, aspect),
+    src: cloudinaryUrl(cloud, publicId, srcWidth, aspect, gravity),
     srcset: widths
-      .map((width) => `${cloudinaryUrl(cloud, publicId, width, aspect)} ${width}w`)
+      .map((width) => `${cloudinaryUrl(cloud, publicId, width, aspect, gravity)} ${width}w`)
       .join(", "),
     sizes
   };
