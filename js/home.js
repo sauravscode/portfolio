@@ -54,26 +54,14 @@ function renderHero() {
   });
 
   if (img) {
-    // Mount the photograph inside a frame that clips it to the mat below the
-    // header. The img and scrim live in the frame; the frame's #151513 tile
-    // keeps a missing photo a quiet black mat, never a broken image icon.
-    const frame = el("div", "hero-frame");
-
     // Fade the photograph in once it has loaded (instantly if already cached).
     img.addEventListener("load", () => img.classList.add("is-loaded"));
     if (img.complete) img.classList.add("is-loaded");
-
-    // On a load error the img removes itself (makeImg) and its parent (the
-    // frame) gets .is-imgless; also mark #hero so the keyline hides and drop
-    // the scrim, keeping the fallback a plain black mat.
+    // On a load error the img removes itself (makeImg) and #hero gets
+    // .is-imgless; drop the scrim too so the fallback stays plain ground.
     const veil = scrim("hero-scrim");
-    img.addEventListener("error", () => {
-      veil.remove();
-      hero.classList.add("is-imgless");
-    }, { once: true });
-
-    frame.append(img, veil);
-    hero.append(frame);
+    img.addEventListener("error", () => veil.remove(), { once: true });
+    hero.append(img, veil);
   } else {
     // No resolvable image: the hero stays plain ground, name still shows.
     hero.classList.add("is-imgless");

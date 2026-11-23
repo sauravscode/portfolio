@@ -196,16 +196,10 @@ em {
   z-index: 20;
 }
 
-/* Over the home hero: the header sits on the black mat above the mounted
-   photograph, not on the image, so it becomes a fixed band matching the
-   hero's reserved --head-h (88px, 64px below 640px). */
+/* Over the home hero: no band, just type on the photograph. */
 .site-head--overlay {
   position: absolute;
   inset: 0 0 auto 0;
-  --head-h: 88px;
-  height: var(--head-h);
-  display: flex;
-  align-items: center;
 }
 
 .head-inner {
@@ -257,12 +251,14 @@ em {
   color: var(--ink);
 }
 
-/* The header sits on the black mat now, so it needs no text-shadow halo. */
-
-@media (max-width: 639.98px) {
-  .site-head--overlay {
-    --head-h: 64px;
-  }
+/* On the home hero the ivory wordmark and nav sit on a bright sky; the same
+   soft halo as the tagline keeps them legible without a visible box. */
+.site-head--overlay .wordmark,
+.site-head--overlay .nav-link {
+  text-shadow:
+    0 0 2px rgba(0, 0, 0, 0.9),
+    0 1px 3px rgba(0, 0, 0, 0.8),
+    0 2px 18px rgba(0, 0, 0, 0.85);
 }
 
 /* ============================================================================
@@ -485,12 +481,6 @@ em {
   overflow: hidden;
   background: var(--ground);
 
-  /* Museum-print mounting: the page ground forms a black mat around the
-     photograph. --mat is the mat width on all four sides; --head-h reserves
-     the band above the photo for the header (88px, 64px below 640px). */
-  --mat: clamp(10px, 2.6vw, 40px);
-  --head-h: 88px;
-
   /* Same horizontal frame as the header's .wrap (max-width 1200px centred,
      inset by the gutter), so the hero name and Scroll cue line up with the
      wordmark and nav at ≥ 640px. Below that the frame collapses to the gutter. */
@@ -500,36 +490,6 @@ em {
 /* No resolvable image: keep the plain ground, never a fallback tile. */
 .hero.is-imgless {
   background: var(--ground);
-}
-
-/* The black tile the photograph is mounted on; it clips the image to the mat
-   (the hero's ground shows through as the surrounding mat). */
-.hero-frame {
-  position: absolute;
-  top: var(--head-h);
-  left: var(--mat);
-  right: var(--mat);
-  bottom: var(--mat);
-  overflow: hidden;
-  background: #151513;
-}
-
-/* Ivory hairline just outside the photo edge. The frame clips (overflow:
-   hidden), so the line is drawn on .hero itself, a few px out from the frame. */
-.hero::before {
-  content: "";
-  position: absolute;
-  top: calc(var(--head-h) - 8px);
-  left: calc(var(--mat) - 8px);
-  right: calc(var(--mat) - 8px);
-  bottom: calc(var(--mat) - 8px);
-  border: 1px solid rgba(236, 230, 218, 0.28);
-  pointer-events: none;
-  z-index: 1;
-}
-
-.hero.is-imgless::before {
-  display: none;
 }
 
 .hero-img {
@@ -574,8 +534,9 @@ em {
   position: absolute;
   left: var(--frame);
   right: var(--frame);
-  bottom: calc(var(--mat) + clamp(24px, 4.5vh, 52px));
+  bottom: 0;
   z-index: 2;
+  padding: 0 0 clamp(28px, 5vh, 56px);
 }
 
 .hero-name {
@@ -608,7 +569,7 @@ em {
 .hero-cue {
   position: absolute;
   right: var(--frame);
-  bottom: calc(var(--mat) + clamp(24px, 4.5vh, 52px));
+  bottom: clamp(28px, 5vh, 56px);
   z-index: 2;
   display: inline-flex;
   align-items: center;
@@ -724,17 +685,6 @@ em {
 }
 
 @media (max-width: 639.98px) {
-  .hero {
-    --head-h: 64px;
-  }
-
-  .hero::before {
-    top: calc(var(--head-h) - 5px);
-    left: calc(var(--mat) - 5px);
-    right: calc(var(--mat) - 5px);
-    bottom: calc(var(--mat) - 5px);
-  }
-
   .hero-content {
     text-align: center;
   }
